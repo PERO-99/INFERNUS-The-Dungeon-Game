@@ -2838,6 +2838,9 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   </div>
 </div>
 <script>
+// ── DEVICE DETECTION (must be FIRST — used by background IIFE below) ──────────
+var IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+  || (navigator.maxTouchPoints > 1 && window.innerWidth < 900);
 
 (function() {
   const canvas = document.getElementById('bgCanvas');
@@ -3079,10 +3082,6 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
     start();
   }
 })();
-
-// ── DEVICE DETECTION ──────────────────────────────────────────
-const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
-  || (navigator.maxTouchPoints > 1 && window.innerWidth < 900);
 
 const ST = {
   s:{shake:true,gore:true,particles:true,fps:false},
