@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>INFERNUS — Rise of the Damned</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@400;500;600;700&display=swap');
@@ -16,8 +16,8 @@
   --purple:#6B21A8; --cyan:#00D4FF;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;}
-body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crosshair;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;overscroll-behavior:none;-webkit-overflow-scrolling:touch;}
+body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crosshair;-webkit-tap-highlight-color:transparent;touch-action:none;}
 
 /* ── SCREENS ── */
 .screen{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease;}
@@ -868,15 +868,15 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 .vol-val{font-size:10px;color:var(--gold);width:28px;text-align:center;}
 
 /* ── HUD ── */
-#gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;will-change:transform;touch-action:none;}
+#gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;will-change:transform;touch-action:none;transform:translateZ(0);-webkit-transform:translateZ(0);backface-visibility:hidden;}
 #hud{position:absolute;inset:0;z-index:5;pointer-events:none;display:none;}
 #hud.active{display:block;}
-.hud-top{position:absolute;top:0;left:0;right:0;padding:10px 18px;display:flex;justify-content:space-between;align-items:flex-start;
+.hud-top{position:absolute;top:0;left:0;right:0;padding:clamp(6px,1.5vw,10px) clamp(8px,2vw,18px);display:flex;justify-content:space-between;align-items:flex-start;
   background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,transparent 100%);}
 .player-panel{display:flex;flex-direction:column;gap:5px;}
 .player-name-row{display:flex;align-items:center;gap:9px;}
 .player-portrait{
-  width:48px;height:48px;
+  width:clamp(36px,7vw,48px);height:clamp(36px,7vw,48px);
   border:2px solid var(--gold);
   background:linear-gradient(135deg,rgba(20,12,30,.9),rgba(10,6,18,.95));
   display:flex;align-items:center;justify-content:center;
@@ -889,7 +889,7 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 .player-level{font-size:9px;color:var(--text-dim);letter-spacing:.2em;}
 .bar-row{display:flex;align-items:center;gap:7px;}
 .bar-icon{font-size:11px;width:15px;text-align:center;flex-shrink:0;}
-.bar-track{width:155px;height:7px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.07);position:relative;overflow:hidden;border-radius:1px;}
+.bar-track{width:clamp(100px,22vw,155px);height:7px;background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.07);position:relative;overflow:hidden;border-radius:1px;}
 .bar-fill{height:100%;transition:width .25s ease;}
 .bar-fill::after{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:rgba(255,255,255,.55);filter:blur(2px);}
 .hp-fill{background:linear-gradient(90deg,#004400,var(--hp-green));box-shadow:0 0 8px rgba(0,255,68,.2);}
@@ -912,7 +912,7 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 .combo-disp{font-size:11px;color:var(--ember);letter-spacing:.13em;animation:cp .45s ease;display:none;}
 .combo-disp.show{display:block;}
 @keyframes cp{0%{transform:scale(1.5)}100%{transform:scale(1)}}
-.rage-panel{position:absolute;bottom:90px;left:18px;pointer-events:all;}
+.rage-panel{position:absolute;bottom:clamp(76px,12vh,90px);left:clamp(10px,2vw,18px);pointer-events:all;}
 .rage-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.18em;color:var(--rage-orange);margin-bottom:4px;text-align:center;}
 .rage-orb{width:58px;height:58px;border-radius:50%;border:2px solid var(--rage-orange);
   background:radial-gradient(circle,rgba(255,100,0,.45) 0%,rgba(100,0,0,.85) 100%);
@@ -923,7 +923,7 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 .rage-orb.full{animation:rf .5s ease infinite alternate;box-shadow:0 0 40px rgba(255,100,0,.85);}
 .rage-orb .rage-pct-text{position:absolute;bottom:4px;font-size:7px;color:var(--rage-orange);font-family:'Cinzel',serif;letter-spacing:0;}
 @keyframes rf{0%{border-color:var(--rage-orange)}100%{border-color:var(--gold-bright)}}
-.minimap{position:absolute;top:110px;right:14px;width:105px;height:105px;
+.minimap{position:absolute;top:clamp(80px,14vh,110px);right:clamp(8px,2vw,14px);width:clamp(70px,15vw,105px);height:clamp(70px,15vw,105px);
   background:rgba(4,4,10,.88);border:1px solid var(--stone2);overflow:hidden;pointer-events:none;}
 .minimap-lbl{position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:7px;letter-spacing:.18em;color:var(--text-dim);}
 .kill-feed{position:absolute;right:14px;display:flex;flex-direction:column;gap:4px;pointer-events:none;}
@@ -931,9 +931,9 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   font-size:10px;letter-spacing:.1em;animation:kfi .3s ease,kfo .4s ease 2.6s forwards;}
 @keyframes kfi{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 @keyframes kfo{to{opacity:0;transform:translateX(18px)}}
-.skills-bar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:flex-end;}
+.skills-bar{position:absolute;bottom:clamp(8px,2vh,14px);left:50%;transform:translateX(-50%);display:flex;gap:clamp(3px,1vw,6px);align-items:flex-end;}
 .skill-slot{
-  width:54px;height:54px;
+  width:clamp(42px,8vw,54px);height:clamp(42px,8vw,54px);
   background:rgba(8,6,18,.92);
   border:2px solid rgba(60,50,80,.6);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -2157,6 +2157,35 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 @media(pointer:fine){
   #touchControls{display:none!important;}
 }
+
+/* ── MOBILE RESPONSIVE OVERRIDES ──────────────────────────── */
+@media(max-width:480px){
+  .player-name-text{font-size:10px;}
+  .bar-val{font-size:8px;min-width:36px;}
+  .score-disp{font-size:13px;}
+  .wave-badge{font-size:9px;padding:4px 8px;}
+  .boss-bar-wrap{width:min(320px,72vw);}
+  .rage-orb{width:46px;height:46px;font-size:18px;}
+  .notif{font-size:10px;padding:7px 16px;white-space:normal;text-align:center;max-width:80vw;}
+  .skill-slot .s-icon{font-size:18px;}
+  .skill-slot .s-key{display:none;}
+  .ctrl-hint{display:none;}
+  .kill-feed{display:none;}
+  .hud-top{flex-wrap:wrap;gap:4px;}
+  .htp-section-card{padding:8px 10px;}
+  /* Shop responsive */
+  #shopScreen .shop-layout{flex-direction:column!important;}
+  #shopScreen .shop-sidebar{width:100%!important;max-height:30vh;overflow-y:auto;}
+  #shopScreen .shop-main{width:100%!important;}
+  /* Mode select stack fully on tiny screens */
+  .mode-panels{flex-direction:column!important;}
+  .mode-panel{flex:0 0 25vh!important;min-height:unset!important;}
+}
+/* Safe area insets for iPhone notch/home bar */
+@supports(padding: max(0px)){
+  .skills-bar{padding-bottom:env(safe-area-inset-bottom,0px);}
+  .hud-top{padding-top:max(clamp(6px,1.5vw,10px), env(safe-area-inset-top,0px));}
+}
 </style>
 </head>
 <body>
@@ -3040,6 +3069,10 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   }
 })();
 
+// ── DEVICE DETECTION ──────────────────────────────────────────
+const IS_MOBILE = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
+  || (navigator.maxTouchPoints > 1 && window.innerWidth < 900);
+
 const ST = {
   s:{shake:true,gore:true,particles:true,fps:false},
   get(k){return this.s[k];},
@@ -3411,10 +3444,22 @@ const PL={
   get sy(){return this.y+CNV.height/2-CAM.y+CAM.sy;}
 };
 const CAM={x:0,y:0,sx:0,sy:0,smag:0,sdur:0,
-  shake(mag,dur=18){this.smag=Math.max(this.smag,mag);this.sdur=Math.max(this.sdur,dur);},
+  shake(mag,dur=18){
+    // On mobile: reduce shake magnitude/duration to prevent violent jitter
+    const m=IS_MOBILE?mag*0.4:mag;
+    const d=IS_MOBILE?Math.ceil(dur*0.5):dur;
+    this.smag=Math.max(this.smag,m);this.sdur=Math.max(this.sdur,d);
+  },
   update(){
-    if(this.sdur>0){this.sx=(Math.random()-.5)*this.smag;this.sy=(Math.random()-.5)*this.smag;
-      this.sdur--;this.smag*=.86;}else{this.sx=0;this.sy=0;this.smag=0;}
+    if(this.sdur>0){
+      this.sx=(Math.random()-.5)*this.smag;this.sy=(Math.random()-.5)*this.smag;
+      this.sdur--;this.smag*=.86;
+      // On mobile: apply shake via CSS transform (GPU composited, no layout thrash)
+      if(IS_MOBILE&&CNV){CNV.style.transform='translate('+this.sx.toFixed(1)+'px,'+this.sy.toFixed(1)+'px) translateZ(0)';this.sx=0;this.sy=0;}
+    }else{
+      this.sx=0;this.sy=0;this.smag=0;
+      if(IS_MOBILE&&CNV)CNV.style.transform='translateZ(0)';
+    }
   },
   ws(wx,wy){return{x:wx-PL.x+CNV.width/2+this.sx,y:wy-PL.y+CNV.height/2+this.sy};}
 };
@@ -3532,7 +3577,7 @@ class Enemy{
       const phaseColor=this.isBoss
         ? (this.phase===2?'#FF2200':(this.phase===1?'#FF8800':this.col))
         : this.col;
-      setGlow(C, phaseColor, 22);
+      setGlow(C, phaseColor, 22, true); // force glow for bosses/elites always
       C.strokeStyle=phaseColor;C.lineWidth=2.5;
       C.beginPath();C.arc(s.x,s.y+bob,this.sz+5,0,Math.PI*2);C.stroke();
       clearGlow(C);
@@ -3720,8 +3765,12 @@ const BIOMES=[
   }
 ];
 
-// glow helpers
-function setGlow(C,col,blur){C.shadowColor=col;C.shadowBlur=blur;}
+// glow helpers — on mobile, skip shadowBlur (very expensive on Canvas 2D)
+// Pass forceGlow=true for boss/elite enemies where glow is essential
+function setGlow(C,col,blur,forceGlow){
+  if(IS_MOBILE&&!forceGlow)return; // skip on mobile for perf
+  C.shadowColor=col;C.shadowBlur=blur;
+}
 function clearGlow(C){C.shadowColor='transparent';C.shadowBlur=0;}
 
 const GS={
@@ -3732,7 +3781,7 @@ const GS={
   biome:0,
   runeEffects:{goldMult:1,rageMult:1,lifestealKill:0,dmgReduce:false,cdReduce:0},
   
-  MAX_PROJS:80,MAX_PARTICLES:90,
+  MAX_PROJS:IS_MOBILE?28:80,MAX_PARTICLES:IS_MOBILE?35:90,
   shoot(x,y,tx,ty,dmg,col,isPlayer,spd){
     if(this.projs.length>=this.MAX_PROJS)return;
     this.projs.push(new Proj(x,y,tx,ty,dmg,col,isPlayer,spd));
@@ -3908,7 +3957,7 @@ const IN={
       const dl=Math.hypot(dx,dy)||1;
       PL.vx=dx/dl*spd;PL.vy=dy/dl*spd;
       PL.lastDir={x:dx,y:dy};
-      if(ST.get('particles')&&Math.random()<.25)GS.particles.push({
+      if(ST.get('particles')&&Math.random()<(IS_MOBILE?.1:.25))GS.particles.push({
         x:PL.x,y:PL.y,vx:(Math.random()-.5),vy:(Math.random()-.5),
         life:14,maxLife:14,col:PL.charData.col,sz:3});
     }else{PL.vx*=.68;PL.vy*=.68;}
@@ -3916,7 +3965,7 @@ const IN={
     const B=GS.B;
     PL.x=Math.max(B.x+25,Math.min(B.x+B.w-25,PL.x));
     PL.y=Math.max(B.y+25,Math.min(B.y+B.h-25,PL.y));
-    if(this.mDown){this.holdTimer++;if(this.holdTimer%18===0)this.doAttack();}
+    if(this.mDown){this.holdTimer++;if(this.holdTimer%(IS_MOBILE?24:18)===0)this.doAttack();}
   },
   doAttack(){
     if(!PL.alive||PL.dodging)return;
@@ -3945,7 +3994,7 @@ const IN={
         e.hit(dmg);hit=true;
         spawnDmgPop(e.sx+(Math.random()-.5)*30,e.sy-22,crit?'CRIT '+dmg:dmg,crit?'crit':'normal');
         PL.gainRage(9);AU.sfx(crit?'crit':'hit');
-        if(ST.get('particles'))GS.explodeParticles(e.x,e.y,'#FF4444',4,4);
+        if(ST.get('particles'))GS.explodeParticles(e.x,e.y,'#FF4444',IS_MOBILE?2:4,4);
       }
     });
     if(!hit||['mage','huntress'].includes(PL.charData.id)){
@@ -4042,7 +4091,7 @@ const TOUCH=(function(){
     const btn=document.getElementById('tcAtk');
     if(!btn)return;
     function fire(){if(GS.running&&!GS.paused&&PL.alive)IN.doAttack();}
-    btn.addEventListener('touchstart',e=>{e.preventDefault();btn.classList.add('pressed');fire();atkInterval=setInterval(fire,200);AU.unlock();},{passive:false});
+    btn.addEventListener('touchstart',e=>{e.preventDefault();btn.classList.add('pressed');fire();atkInterval=setInterval(fire,IS_MOBILE?280:200);AU.unlock();},{passive:false});
     btn.addEventListener('touchend',e=>{e.preventDefault();btn.classList.remove('pressed');clearInterval(atkInterval);atkInterval=null;},{passive:false});
     btn.addEventListener('touchcancel',e=>{btn.classList.remove('pressed');clearInterval(atkInterval);atkInterval=null;},{passive:false});
   }
@@ -4136,7 +4185,15 @@ function tickSkillCDs(){
 }
 const CNV=document.getElementById('gameCanvas');
 const CTX=CNV.getContext('2d');
-function resizeCNV(){CNV.width=window.innerWidth;CNV.height=window.innerHeight;}
+function resizeCNV(){
+  // Use devicePixelRatio on mobile for sharp rendering on retina screens
+  const dpr=IS_MOBILE?Math.min(window.devicePixelRatio||1,2):1;
+  const w=window.innerWidth,h=window.innerHeight;
+  CNV.width=Math.round(w*dpr);CNV.height=Math.round(h*dpr);
+  CNV.style.width=w+'px';CNV.style.height=h+'px';
+  CTX.setTransform(1,0,0,1,0,0); // reset transform before rescaling
+  if(dpr!==1)CTX.scale(dpr,dpr);
+}
 function drawDungeon(){
   const C=CTX,B=GS.B;
   const BM=BIOMES[GS.biome]||BIOMES[0];
@@ -4182,10 +4239,10 @@ function drawDungeon(){
       C.fillStyle='#1A1A2A';C.fillRect(s.x-22,s.y-28,44,58);
       C.fillStyle='#222238';C.fillRect(s.x-25,s.y-34,50,10);C.fillRect(s.x-25,s.y+26,50,8);
       const ts=CAM.ws(p[0],p[1]-34);
-      setGlow(C,'rgba(255,120,0,1)',30+flick);
+      if(!IS_MOBILE)setGlow(C,'rgba(255,120,0,1)',30+flick);
       C.fillStyle=`rgba(255,${120+flick*8},0,1)`;
       C.beginPath();C.arc(ts.x,ts.y,3,0,Math.PI*2);C.fill();
-      clearGlow(C);
+      if(!IS_MOBILE)clearGlow(C);
       C.fillStyle=`rgba(255,${140+flick*5},0,.12)`;
       C.beginPath();C.arc(ts.x,ts.y,55+flick,0,Math.PI*2);C.fill();
     });
@@ -4200,10 +4257,10 @@ function drawDungeon(){
         C.beginPath();C.moveTo(s.x+ox,s.y+oy);C.lineTo(s.x+ox-w,s.y+10);C.lineTo(s.x+ox+w,s.y+10);C.closePath();C.fill();
       });
       // Crystal glow top
-      setGlow(C,'rgba(0,212,255,.9)',20*pulse);
+      if(!IS_MOBILE)setGlow(C,'rgba(0,212,255,.9)',20*pulse);
       C.fillStyle=`rgba(0,212,255,${.7*pulse})`;
       C.beginPath();C.arc(s.x,s.y-40,6,0,Math.PI*2);C.fill();
-      clearGlow(C);
+      if(!IS_MOBILE)clearGlow(C);
       // Prismatic sparkle
       C.fillStyle=`rgba(180,240,255,${.55*pulse})`;
       C.beginPath();C.arc(s.x,s.y-40,2,0,Math.PI*2);C.fill();
@@ -4391,10 +4448,12 @@ function updateRage(){
   document.getElementById('ragePctText').textContent=Math.floor(pct)+'%';
 }
 function spawnDmgPop(x,y,text,type='normal'){
+  // On mobile, limit max simultaneous damage pop DOM elements to avoid layout thrash
+  if(IS_MOBILE){const existing=document.querySelectorAll('.dmg-pop').length;if(existing>6)return;}
   const el=document.createElement('div');
   el.className=`dmg-pop ${type}`;el.textContent=text;
   el.style.left=(x-20)+'px';el.style.top=y+'px';
-  document.body.appendChild(el);setTimeout(()=>el.remove(),1400);
+  document.body.appendChild(el);setTimeout(()=>el.remove(),IS_MOBILE?900:1400);
 }
 function addKillFeed(msg){
   const fd=document.getElementById('killFeed');
