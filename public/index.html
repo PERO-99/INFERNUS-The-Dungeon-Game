@@ -30,8 +30,8 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 .cine-vignette{position:absolute;inset:0;pointer-events:none;z-index:3;
   background:radial-gradient(ellipse at 50% 42%,transparent 28%,rgba(0,0,0,.55) 72%,rgba(0,0,0,.96) 100%);}
 .cine-grain{position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.04;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  /* No transform animation — prevents screen shake on all pages */}
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  /* No animation — prevents screen shake on all pages */}
 
 /* ── LOADING SCREEN ── */
 #loadingScreen{background:#000;z-index:100;}
@@ -41,9 +41,9 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 @keyframes loadBurst{0%{filter:brightness(1) saturate(1)}35%{filter:brightness(2.4) saturate(1.6)}100%{filter:brightness(1) saturate(1)}}
 .load-sigil{position:relative;width:min(230px,58vw);aspect-ratio:1;display:flex;align-items:center;justify-content:center;margin-bottom:2px;}
 .sigil-ring{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 0 6px rgba(212,175,55,.35));}
-.sigil-ring-outer{animation:sigilSpin 50s linear infinite;}
-.sigil-ring-mid{animation:sigilSpin 34s linear infinite reverse;}
-.sigil-ring-inner{animation:sigilSpin 22s linear infinite;}
+.sigil-ring-outer{animation:sigilSpin 50s linear infinite;will-change:transform;}
+.sigil-ring-mid{animation:sigilSpin 34s linear infinite reverse;will-change:transform;}
+.sigil-ring-inner{animation:sigilSpin 22s linear infinite;will-change:transform;}
 @keyframes sigilSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .load-logo{position:relative;font-family:'Cinzel Decorative',serif;font-size:clamp(30px,6.4vw,70px);font-weight:900;letter-spacing:.1em;
   background:linear-gradient(180deg,#FFF5CC 0%,var(--gold-bright) 20%,var(--gold) 55%,var(--ember) 100%);
@@ -490,9 +490,9 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   .mode-panel-vtag{display:none;}
 }
 
-/* \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-   HOW TO PLAY SCREEN \u2014 Animated cinematic guide
-\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+/* ──────────────────────────────────────────
+   HOW TO PLAY SCREEN — Animated cinematic guide
+────────────────────────────────────────── */
 #howToPlay{
   background:radial-gradient(ellipse at 50% 30%,#150305 0%,#080008 50%,#000 100%);
   overflow:hidden;
@@ -1075,6 +1075,8 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   animation:sigilFloat 3s ease-in-out infinite;
 }
 @keyframes sigilFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+/* Isolate sigil float animation so it doesn't affect parent layout */
+.title-sigil-wrap{will-change:transform;contain:layout;}
 .login-title{
   font-family:'Cinzel Decorative',serif;
   font-size:clamp(18px,4vw,26px);
@@ -1371,26 +1373,6 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   .htp-grid{grid-template-columns:1fr;}
   #howToPlay{padding:20px 10px 30px;}
 }
-:root {
-  --blood:#8B0000; --blood-bright:#CC0000; --gold:#D4AF37; --gold-bright:#FFD700;
-  --ember:#FF4500; --dark:#0A0A0F; --surface:#12121A; --surface2:#1A1A25;
-  --stone:#2A2A35; --stone2:#353545; --text:#E8D5B0; --text-dim:#8A7A60;
-  --hp-green:#00FF44; --rage-orange:#FF6600; --mp-blue:#4488FF;
-}
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;}
-body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crosshair;}
-.screen{position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s ease;}
-.screen.hidden{opacity:0;pointer-events:none;}
-.cine-vignette{position:absolute;inset:0;pointer-events:none;z-index:3;
-  background:radial-gradient(ellipse at 50% 42%,transparent 32%,rgba(0,0,0,.5) 76%,rgba(0,0,0,.94) 100%);}
-.cine-grain{position:absolute;inset:0;pointer-events:none;z-index:3;opacity:.05;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  animation:grainShift 1.4s steps(4) infinite;}
-@keyframes grainShift{0%{transform:translate(0,0)}25%{transform:translate(-1%,1%)}50%{transform:translate(1%,-1%)}75%{transform:translate(-1%,-1%)}100%{transform:translate(0,0)}}
-#loadingScreen{background:#000;z-index:100;}
-#loadParticleCanvas{position:absolute;inset:0;pointer-events:none;}
-.load-wrap{position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center;transition:transform .08s ease-out;}
 #loadingScreen.load-complete .load-wrap{animation:loadBurst .55s ease;}
 @keyframes loadBurst{0%{filter:brightness(1) saturate(1)}35%{filter:brightness(2.4) saturate(1.6)}100%{filter:brightness(1) saturate(1)}}
 .load-sigil{position:relative;width:min(230px,58vw);aspect-ratio:1;display:flex;align-items:center;justify-content:center;margin-bottom:2px;}
@@ -2159,6 +2141,15 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 }
 
 /* ── MOBILE RESPONSIVE OVERRIDES ──────────────────────────── */
+/* On mobile: disable backdrop-filter (causes whole-page GPU repaints = shake) */
+@media(pointer:coarse){
+  .htp-section-card,.shop-layout,.prog-layout,[style*="backdrop-filter"],
+  #levelComplete,#deathScreen,#pauseMenu,.screen{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;}
+  /* Disable mix-blend-mode on grain overlay (forces software compositing = slow) */
+  .cine-grain{mix-blend-mode:normal!important;opacity:.03;}
+  /* Stop any remaining transform animations on menu pages */
+  .screen:not(#gameCanvas){will-change:auto;}
+}
 @media(max-width:480px){
   .player-name-text{font-size:10px;}
   .bar-val{font-size:8px;min-width:36px;}
@@ -2185,6 +2176,20 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 @supports(padding: max(0px)){
   .skills-bar{padding-bottom:env(safe-area-inset-bottom,0px);}
   .hud-top{padding-top:max(clamp(6px,1.5vw,10px), env(safe-area-inset-top,0px));}
+}
+/* ── MOBILE: Disable expensive filter animations that cause GPU stalls = shake ── */
+@media(pointer:coarse){
+  /* Disable filter:drop-shadow pulse animations (massive GPU cost on mobile) */
+  .load-logo{animation:none!important;filter:drop-shadow(0 0 12px rgba(212,175,55,.7))!important;}
+  .game-title{animation:none!important;filter:drop-shadow(0 0 16px rgba(212,175,55,.5))!important;}
+  .sigil-ring{filter:none!important;} /* drop-shadow on SVG is expensive */
+  /* Replace filter-animating keyframes with simple opacity fades */
+  @keyframes lp{0%,100%{opacity:1}50%{opacity:.9}}
+  @keyframes tg{0%,100%{opacity:1}50%{opacity:.9}}
+  @keyframes dp{0%,100%{opacity:1}50%{opacity:.85}}
+  @keyframes vs{0%,100%{opacity:1}50%{opacity:.85}}
+  /* Disable title screen scrolling ticker (uses translateX transform = jitter) */
+  .htpScroll,.htp-ticker-inner{animation:none!important;}
 }
 </style>
 </head>
@@ -3040,17 +3045,23 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
     });
 
     runes = runes.filter(r => r.life > 0.01 && r.y > -100);
-    while (runes.length < 20) {
+    const maxRunes = (typeof IS_MOBILE !== 'undefined' && IS_MOBILE) ? 8 : 20;
+    while (runes.length < maxRunes) {
       runes.push(spawnRune());
     }
   }
 
-  function loop() {
+  let _bgLastT = 0;
+  const _bgInterval = typeof IS_MOBILE !== 'undefined' && IS_MOBILE ? 33 : 16; // 30fps mobile, 60fps desktop
+  function loop(t) {
+    animId = requestAnimationFrame(loop);
+    // Throttle background animation on mobile to reduce CPU pressure
+    if (typeof IS_MOBILE !== 'undefined' && IS_MOBILE && t - _bgLastT < _bgInterval) return;
+    _bgLastT = t;
     update();
     drawBackground();
     drawRunes();
     drawParticles();
-    animId = requestAnimationFrame(loop);
   }
 
   function start() {
