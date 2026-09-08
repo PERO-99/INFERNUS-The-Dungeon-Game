@@ -1943,10 +1943,10 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 
 @media(pointer:coarse){
   .ctrl-hint{display:none!important;}
-  .minimap{display:none;} 
+  /* minimap IS shown on mobile — repositioned in the mobile overrides block below */
   .kill-feed{right:6px;top:auto!important;bottom:210px;}
   .notif-area{top:64px;}
-  .skills-bar{display:none!important;} 
+  .skills-bar{display:none!important;}
 }
 
 #touchControls{
@@ -2102,12 +2102,16 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 
 .tc-skills-row{
   position:absolute;
-  /* Anchored left, above the joystick — avoids center overlap with ATK/DODGE */
-  bottom:calc(18px + env(safe-area-inset-bottom,0px));
-  left:170px; /* starts after joystick (130px wide + 22px left + 18px gap) */
+  /* Sits ABOVE the joystick — safe from right-side buttons */
+  bottom:calc(175px + env(safe-area-inset-bottom,0px));
+  left:14px;
+  right:90px; /* don't intrude into right-button zone */
   display:flex;flex-direction:row;gap:6px;
+  justify-content:flex-start;
   pointer-events:none;
-  padding:0 4px;
+  padding:0 2px;
+  flex-wrap:nowrap;
+  overflow:hidden;
 }
 .tc-skill-btn{
   width:44px;height:44px;
@@ -2177,6 +2181,8 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   /* ── CRITICAL: Hide desktop-only HUD elements on mobile ── */
   /* The desktop skills bar conflicts with touch control skill buttons */
   .skills-bar{display:none!important;}
+  /* Show minimap on mobile but reposition it — DON'T hide it */
+  .minimap{display:block!important;}
   /* Ctrl hint and kill feed are desktop-only */
   .ctrl-hint{display:none!important;}
   .kill-feed{display:none!important;}
@@ -3881,7 +3887,9 @@ const GS={
     }).slice(0,Math.min(typeKeys.length,3+Math.floor(wv/2)));
     // If no biome enemies unlocked yet, fallback to base enemies
     const pool=available.length>0?available:['imp','skeleton','demon'];
-    const cnt=6+wv*3+(GS.mode==='god'?5:0);
+    // Cap enemy count on mobile to prevent frame-drop during large waves
+    const mobileCap = IS_MOBILE ? Math.min(12, 4 + wv * 2) : (6 + wv * 3 + (GS.mode==='god'?5:0));
+    const cnt = mobileCap;
     const B=this.B;
     for(let i=0;i<cnt;i++){
       let ex,ey,att=0;
@@ -4457,11 +4465,23 @@ function drawPlayer(){
     C.restore();PL.atkTimer--;
   }
 }
+// Cache vignette gradient — recreating radial gradients every frame is expensive on mobile
+let _vigGrad=null,_vigW=0,_vigH=0;
 function drawVignette(){
   const C=CTX;
-  const vg=C.createRadialGradient(CNV.width/2,CNV.height/2,CNV.height*.28,CNV.width/2,CNV.height/2,CNV.height*.85);
-  vg.addColorStop(0,'transparent');vg.addColorStop(1,'rgba(0,0,0,.58)');
-  C.fillStyle=vg;C.fillRect(0,0,CNV.width,CNV.height);
+  // On mobile: skip the expensive double-gradient vignette, use a simple dark rect instead
+  if(IS_MOBILE){
+    C.fillStyle='rgba(0,0,0,0.28)';
+    C.fillRect(0,0,8,CNV.height);C.fillRect(CNV.width-8,0,8,CNV.height);
+    C.fillRect(0,0,CNV.width,8);C.fillRect(0,CNV.height-8,CNV.width,8);
+    return;
+  }
+  if(_vigW!==CNV.width||_vigH!==CNV.height){
+    _vigW=CNV.width;_vigH=CNV.height;
+    _vigGrad=C.createRadialGradient(CNV.width/2,CNV.height/2,CNV.height*.28,CNV.width/2,CNV.height/2,CNV.height*.85);
+    _vigGrad.addColorStop(0,'transparent');_vigGrad.addColorStop(1,'rgba(0,0,0,.58)');
+  }
+  C.fillStyle=_vigGrad;C.fillRect(0,0,CNV.width,CNV.height);
   const pg=C.createRadialGradient(CNV.width/2+CAM.sx,CNV.height/2+CAM.sy,0,CNV.width/2+CAM.sx,CNV.height/2+CAM.sy,190);
   pg.addColorStop(0,PL.raging?'rgba(255,100,0,.1)':'rgba(255,180,50,.05)');pg.addColorStop(1,'transparent');
   C.fillStyle=pg;C.fillRect(0,0,CNV.width,CNV.height);
@@ -4534,8 +4554,14 @@ let lastT=0,fpsAcc=0,fpsCount=0,fpsCur=60,frameN=0,nowCache=0;
 let _mmCtx=null;
 
 let _enemyUpdateFrame=0;
+// Mobile: throttle game loop to ~30fps to reduce CPU/GPU pressure
+const _MOBILE_FRAME_MS = IS_MOBILE ? 33 : 0; // 33ms = 30fps cap
+let _lastFrameTime = 0;
 function gameLoop(t){
   requestAnimationFrame(gameLoop);
+  // On mobile, skip frames that arrive too fast (cap to 30fps)
+  if(IS_MOBILE && t - _lastFrameTime < _MOBILE_FRAME_MS){ return; }
+  _lastFrameTime = t;
   const rawDt=t-lastT;lastT=t;nowCache=t;
   
   const dt=Math.min(rawDt,33);
@@ -4623,7 +4649,8 @@ function gameLoop(t){
   drawPlayer();
   drawVignette();
   drawFPS(fpsCur);
-  if(frameN%4===0)drawMinimap();
+  // On mobile draw minimap less frequently to save GPU time
+  if(IS_MOBILE ? frameN%8===0 : frameN%4===0) drawMinimap();
 }
 const SH={
   curTab:'weapons',sel:null,
