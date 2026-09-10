@@ -1069,6 +1069,9 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 #gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;will-change:transform;touch-action:none;}
 #hud{position:absolute;inset:0;z-index:5;pointer-events:none;display:none;}
 #hud.active{display:block;}
+/* CRITICAL GUARD: game UI never bleeds onto menu screens */
+body:not(.game-active) #hud{display:none!important;}
+body:not(.game-active) #touchControls{display:none!important;}
 .hud-top{position:absolute;top:0;left:0;right:0;padding:clamp(6px,1.5vw,10px) clamp(8px,2vw,18px);display:flex;justify-content:space-between;align-items:flex-start;
   background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,transparent 100%);}
 .player-panel{display:flex;flex-direction:column;gap:5px;}
@@ -1729,6 +1732,10 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 #gameCanvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1;will-change:transform;touch-action:none;}
 #hud{position:absolute;inset:0;z-index:5;pointer-events:none;display:none;}
 #hud.active{display:block;}
+/* ── CRITICAL: game UI ONLY shows when game is actively running ── */
+/* By default nothing game-related bleeds onto menu screens */
+body:not(.game-active) #hud{display:none!important;}
+body:not(.game-active) #touchControls{display:none!important;}
 .hud-top{position:absolute;top:0;left:0;right:0;padding:10px 18px;display:flex;justify-content:space-between;align-items:flex-start;
   background:linear-gradient(180deg,rgba(0,0,0,.72) 0%,transparent 100%);}
 .player-panel{display:flex;flex-direction:column;gap:5px;}
@@ -2152,11 +2159,16 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 
 @media(pointer:coarse){
   .ctrl-hint{display:none!important;}
-  /* minimap IS shown on mobile — repositioned in the mobile overrides block below */
   .kill-feed{right:6px;top:auto!important;bottom:210px;}
   .notif-area{top:64px;}
+  /* Hide ALL desktop-only HUD elements - touch controls replace them */
   .skills-bar{display:none!important;}
+  .rage-panel{display:none!important;}
 }
+/* JS-class fallback for browsers where pointer:coarse doesn't fire correctly */
+body.is-touch-device .skills-bar{display:none!important;}
+body.is-touch-device .rage-panel{display:none!important;}
+body.is-touch-device .ctrl-hint{display:none!important;}
 
 #touchControls{
   position:absolute;inset:0;z-index:8;
@@ -2164,6 +2176,11 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   display:none; 
 }
 #touchControls.active{display:block;}
+/* Force-hide touch controls on all non-game screens */
+.screen:not(.hidden) ~ #touchControls,
+.screen:not(.hidden) ~ * #touchControls{
+  display:none!important;
+}
 
 .tc-joy-base{
   position:absolute;
@@ -2658,29 +2675,12 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
       <div id="shopDetail" style="color:var(--text-dim);font-size:10px;line-height:1.8;padding:8px 0">Select an item to inspect.</div>
     </div>
   </div>
-  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
-    <button class="back-btn" onclick="
-      if(GS._fromVictory){
-        GS._fromVictory=false;
-        var lc=document.getElementById('levelComplete');
-        if(lc && lc.classList.contains('show')){
-          document.querySelectorAll('.screen').forEach(function(s){s.classList.add('hidden');});
-          document.getElementById('gameScreen').classList.remove('hidden');
-          lc.classList.add('show');
-        } else { G.show('titleScreen'); }
-      } else if(GS._fromDeath){
-        GS._fromDeath=false;
-        var ds=document.getElementById('deathScreen');
-        if(ds && ds.style.display!=='none'){
-          document.querySelectorAll('.screen').forEach(function(s){s.classList.add('hidden');});
-          document.getElementById('gameScreen').classList.remove('hidden');
-          ds.style.display='flex';
-        } else { G.show('titleScreen'); }
-      } else {
-        G.show('titleScreen');
-      }
-    " style="border-color:var(--gold);color:var(--gold);font-size:12px;padding:12px 30px;">⬅ Return to Game</button>
-    <button class="back-btn" onclick="G.show('titleScreen')" style="font-size:12px;padding:12px 30px;">🏠 Main Menu</button>
+  <!-- Smart return button - context-aware -->
+  <div id="shopReturnBtns" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:20px;">
+    <button class="mbtn primary" id="shopReturnBtn" onclick="G.shopReturn()" style="min-width:220px;font-size:13px;">
+      <span class="mbtn-ico" data-icon="play"></span>⬅ Return to Game
+    </button>
+    <button class="back-btn" onclick="G.show('titleScreen')" style="font-size:12px;padding:12px 24px;">🏠 Main Menu</button>
   </div>
 </div>
 <div class="screen hidden" id="settingsScreen">
@@ -3070,7 +3070,7 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   <div class="pause-title">PAUSED</div>
   <div class="pause-menu">
     <button class="mbtn primary" onclick="G.resume()"><span class="mbtn-ico" data-icon="play"></span>Resume</button>
-    <button class="mbtn" onclick="G.show('shopScreen')"><span class="mbtn-ico" data-icon="chest"></span>Quick Shop</button>
+    <button class="mbtn" onclick="GS._fromPause=true;G.show('shopScreen')"><span class="mbtn-ico" data-icon="chest"></span>Quick Shop</button>
     <button class="mbtn" onclick="G.show('settingsScreen')"><span class="mbtn-ico" data-icon="gear"></span>Settings</button>
     <button class="mbtn" style="border-color:var(--blood);color:var(--blood-bright)" onclick="G.toMenu()"><span class="mbtn-ico" data-icon="close"></span>Exit to Menu</button>
   </div>
@@ -3087,7 +3087,7 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   </div>
   <div class="death-btns">
     <button class="mbtn primary" onclick="G.restart()"><span class="mbtn-ico" data-icon="refresh"></span>Try Again</button>
-    <button class="mbtn" onclick="G.show('shopScreen');GS._fromDeath=true;"><span class="mbtn-ico" data-icon="chest"></span>Visit Armory</button>
+    <button class="mbtn" onclick="GS._fromDeath=true;G.show('shopScreen');"><span class="mbtn-ico" data-icon="chest"></span>Visit Armory</button>
     <button class="mbtn" onclick="G.toMenu()"><span class="mbtn-ico" data-icon="house"></span>Main Menu</button>
   </div>
 </div>
@@ -3098,7 +3098,7 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;">
     <button class="mbtn primary" onclick="G.nextWave()" style="min-width:260px;font-size:17px;padding:18px 40px;letter-spacing:.18em;box-shadow:0 0 40px rgba(255,150,0,.45);"><span class="mbtn-ico" data-icon="swords"></span>⚔ Next Wave</button>
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
-      <button class="mbtn" onclick="G.show('shopScreen');GS._fromVictory=true;" style="font-size:11px;padding:10px 20px;"><span class="mbtn-ico" data-icon="chest"></span>Armory</button>
+      <button class="mbtn" onclick="GS._fromVictory=true;G.show('shopScreen');" style="font-size:11px;padding:10px 20px;"><span class="mbtn-ico" data-icon="chest"></span>Armory</button>
       <button class="mbtn" onclick="G.toMenu()" style="font-size:11px;padding:10px 20px;border-color:var(--blood);color:var(--blood-bright);"><span class="mbtn-ico" data-icon="house"></span>Menu</button>
     </div>
   </div>
@@ -4064,6 +4064,8 @@ const GS={
   B:{x:-850,y:-650,w:1700,h:1300},
   bossWave:false,waveComplete:false,
   biome:0,
+  // Shop context flags — set BEFORE calling G.show('shopScreen')
+  _fromPause:false,_fromVictory:false,_fromDeath:false,
   runeEffects:{goldMult:1,rageMult:1,lifestealKill:0,dmgReduce:false,cdReduce:0},
   
   MAX_PROJS:IS_MOBILE?28:80,MAX_PARTICLES:IS_MOBILE?35:90,
@@ -5048,18 +5050,34 @@ const SH={
 const G={
   selChar:CHARS[0],
   pendingMode:null,
+  // Track where shop was opened from
+  _shopFrom:null, // 'pause' | 'death' | 'victory' | null
   show(id){
     AU.sfx('ui');
     const fade=document.getElementById('fadeOverlay');
     fade.classList.add('show');
-    // ALWAYS hide touch controls when navigating to any non-game screen
+    // Leaving game: remove game-active class so HUD/touchControls hide
+    document.body.classList.remove('game-active');
     if(typeof TOUCH!=='undefined')TOUCH.showControls(false);
     setTimeout(()=>{
       document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
       const t=document.getElementById(id);if(t)t.classList.remove('hidden');
       fade.classList.remove('show');
       if(id==='charScreen')this.buildChars();
-      if(id==='shopScreen'){SH.tab('weapons');document.getElementById('goldDisp').textContent=PL.gold;}
+      if(id==='shopScreen'){
+        SH.tab('weapons');
+        document.getElementById('goldDisp').textContent=PL.gold;
+        const retBtn=document.getElementById('shopReturnBtn');
+        const retBtns=document.getElementById('shopReturnBtns');
+        if(retBtn){
+          const inGame=GS._fromPause||GS._fromVictory||GS._fromDeath;
+          retBtn.style.display=inGame?'':'none';
+          if(retBtns)retBtns.style.justifyContent=inGame?'center':'flex-end';
+          if(GS._fromPause)retBtn.innerHTML='<span class="mbtn-ico" data-icon="play"></span>⬅ Resume Game';
+          else if(GS._fromVictory)retBtn.innerHTML='<span class="mbtn-ico" data-icon="play"></span>⬅ Back to Victory';
+          else if(GS._fromDeath)retBtn.innerHTML='<span class="mbtn-ico" data-icon="play"></span>⬅ Back to Results';
+        }
+      }
       if(id==='titleScreen')AU.playTheme('menu');
       if(id==='settingsScreen')AU.sfx('ui');
       if(id==='progressScreen')PROGRESS.render();
@@ -5147,6 +5165,8 @@ const G={
       document.getElementById('levelComplete').classList.remove('show');
       document.getElementById('pauseMenu').classList.remove('open');
       document.getElementById('hud').classList.add('active');
+      // Mark body as game-active so HUD and touch controls are allowed to show
+      document.body.classList.add('game-active');
       GS.running=true;GS.startWave();
       if(typeof TOUCH!=='undefined')TOUCH.showControls(TOUCH.isTouch());
       fade.classList.remove('show');
@@ -5172,14 +5192,60 @@ const G={
     document.getElementById('levelComplete').classList.remove('show');
     GS.wave++;PL.wave=GS.wave;GS.startWave();
   },
+  // Smart return from shop — goes back to the right context
+  shopReturn(){
+    AU.sfx('ui');
+    if(GS._fromPause){
+      GS._fromPause=false;
+      const fade=document.getElementById('fadeOverlay');
+      fade.classList.add('show');
+      setTimeout(()=>{
+        document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+        document.getElementById('hud').classList.add('active');
+        document.getElementById('pauseMenu').classList.add('open');
+        document.body.classList.add('game-active');
+        if(typeof TOUCH!=='undefined')TOUCH.showControls(TOUCH.isTouch());
+        fade.classList.remove('show');
+      },300);
+    } else if(GS._fromVictory){
+      GS._fromVictory=false;
+      const fade=document.getElementById('fadeOverlay');
+      fade.classList.add('show');
+      setTimeout(()=>{
+        document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+        document.getElementById('hud').classList.add('active');
+        document.getElementById('levelComplete').classList.add('show');
+        document.body.classList.add('game-active');
+        if(typeof TOUCH!=='undefined')TOUCH.showControls(TOUCH.isTouch());
+        fade.classList.remove('show');
+      },300);
+    } else if(GS._fromDeath){
+      GS._fromDeath=false;
+      const fade=document.getElementById('fadeOverlay');
+      fade.classList.add('show');
+      setTimeout(()=>{
+        document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+        document.getElementById('hud').classList.add('active');
+        document.getElementById('deathScreen').classList.add('show');
+        document.body.classList.add('game-active');
+        if(typeof TOUCH!=='undefined')TOUCH.showControls(false);
+        fade.classList.remove('show');
+      },300);
+    } else {
+      this.show('titleScreen');
+    }
+  },
   toMenu(){
     AU.sfx('uiBack');GS.running=false;GS.paused=false;
+    GS._fromPause=false;GS._fromVictory=false;GS._fromDeath=false;
     GS.enemies=[];GS.projs=[];GS.particles=[];
     document.getElementById('deathScreen').classList.remove('show');
     document.getElementById('levelComplete').classList.remove('show');
     document.getElementById('pauseMenu').classList.remove('open');
     document.getElementById('hud').classList.remove('active');
     document.getElementById('bossBar').classList.remove('vis');
+    // Remove game-active so HUD/touch controls are completely hidden on menus
+    document.body.classList.remove('game-active');
     if(typeof TOUCH!=='undefined')TOUCH.showControls(false);
     this.show('titleScreen');
   },
@@ -6934,6 +7000,17 @@ const NAMEDIT={
 window.TUTORIAL=TUTORIAL;window.PROGRESS=PROGRESS;window.NAMEDIT=NAMEDIT;
 
 if(typeof TOUCH!=='undefined')TOUCH.init();
+
+// JS-based safety: hide desktop game UI on touch devices
+// Fallback for browsers where @media(pointer:coarse) doesn't fire correctly
+(function(){
+  function applyTouchClass(){
+    const isTouch = window.matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0;
+    if(isTouch) document.body.classList.add('is-touch-device');
+  }
+  applyTouchClass();
+  setTimeout(applyTouchClass, 500);
+})();
 
 </script>
 </body>
