@@ -5103,7 +5103,10 @@ const G={
       else{rp.style.removeProperty('display');}
     }
     if(typeof TOUCH!=='undefined')TOUCH.showControls(isTouch);
+    // Re-apply mobile cleanup 100ms after game UI shows (catches buildSkillSlots updates)
+    if(isTouch)setTimeout(runTouchFix,100);
   },
+
   show(id){
     AU.sfx('ui');
     // ALWAYS hide all game UI first
@@ -7033,9 +7036,10 @@ window.TUTORIAL=TUTORIAL;window.PROGRESS=PROGRESS;window.NAMEDIT=NAMEDIT;
 if(typeof TOUCH!=='undefined')TOUCH.init();
 
 // ── MOBILE UI CLEANUP ─────────────────────────────────────────────
-// Directly hides desktop-only game UI on touch devices.
-// Inline !important styles — cannot be overridden by any CSS.
-(function runTouchFix(){
+// Global function: hides desktop-only game UI on touch devices.
+// Called on load, every 500ms, and after showGameUI() runs.
+// Inline !important styles cannot be overridden by any CSS.
+function runTouchFix(){
   const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
   if(!isTouch)return;
   document.body.classList.add('is-touch-device');
@@ -7046,9 +7050,9 @@ if(typeof TOUCH!=='undefined')TOUCH.init();
   forceHide('#skillsBar');    // desktop 1-5 skill slots bar
   forceHide('.rage-panel');   // desktop rage orb/meter
   forceHide('.ctrl-hint');    // keyboard hints
-  // Re-run after 500ms to catch any late DOM updates from buildSkillSlots etc.
-  setTimeout(runTouchFix,500);
-}());
+}
+runTouchFix();
+setTimeout(runTouchFix,500);
 
 </script>
 </body>
