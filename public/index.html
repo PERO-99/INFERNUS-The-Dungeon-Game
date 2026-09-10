@@ -5052,13 +5052,41 @@ const G={
   pendingMode:null,
   // Track where shop was opened from
   _shopFrom:null, // 'pause' | 'death' | 'victory' | null
+  // ── hideGameUI: forcibly hide everything game-related ──────────
+  hideGameUI(){
+    // Remove body game-active so CSS rules kick in
+    document.body.classList.remove('game-active');
+    // Close pause menu (NOT a .screen, so must be handled explicitly)
+    const pm=document.getElementById('pauseMenu');
+    if(pm)pm.classList.remove('open');
+    // Hide HUD
+    const hud=document.getElementById('hud');
+    if(hud){hud.classList.remove('active');hud.style.display='none';}
+    // Hide touch controls via BOTH class AND direct style (belt-and-suspenders)
+    const tc=document.getElementById('touchControls');
+    if(tc){tc.classList.remove('active');tc.style.setProperty('display','none','important');}
+    // Hide bossbar
+    const bb=document.getElementById('bossBar');
+    if(bb)bb.classList.remove('vis');
+    // Hide desktop skills bar
+    const sb=document.getElementById('skillsBar');
+    if(sb)sb.style.setProperty('display','none','important');
+  },
+  // ── showGameUI: restore game UI when returning to game ──────────
+  showGameUI(){
+    document.body.classList.add('game-active');
+    const hud=document.getElementById('hud');
+    if(hud){hud.style.display='';hud.classList.add('active');}
+    const tc=document.getElementById('touchControls');
+    if(tc){tc.style.removeProperty('display');}
+    if(typeof TOUCH!=='undefined')TOUCH.showControls(TOUCH.isTouch());
+  },
   show(id){
     AU.sfx('ui');
+    // ALWAYS hide all game UI first
+    this.hideGameUI();
     const fade=document.getElementById('fadeOverlay');
     fade.classList.add('show');
-    // Leaving game: remove game-active class so HUD/touchControls hide
-    document.body.classList.remove('game-active');
-    if(typeof TOUCH!=='undefined')TOUCH.showControls(false);
     setTimeout(()=>{
       document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
       const t=document.getElementById(id);if(t)t.classList.remove('hidden');
@@ -5163,12 +5191,8 @@ const G={
       document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
       document.getElementById('deathScreen').classList.remove('show');
       document.getElementById('levelComplete').classList.remove('show');
-      document.getElementById('pauseMenu').classList.remove('open');
-      document.getElementById('hud').classList.add('active');
-      // Mark body as game-active so HUD and touch controls are allowed to show
-      document.body.classList.add('game-active');
       GS.running=true;GS.startWave();
-      if(typeof TOUCH!=='undefined')TOUCH.showControls(TOUCH.isTouch());
+      this.showGameUI(); // show HUD + touch controls + add game-active class
       fade.classList.remove('show');
     },480);
   },
@@ -5195,58 +5219,42 @@ const G={
   // Smart return from shop — goes back to the right context
   shopReturn(){
     AU.sfx('ui');
-    if(GS._fromPause){
-      GS._fromPause=false;
-      const fade=document.getElementById('fadeOverlay');
-      fade.classList.add('show');
-      setTimeout(()=>{
-        document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
-        document.getElementById('hud').classList.add('active');
+    const fade=document.getElementById('fadeOverlay');
+    fade.classList.add('show');
+    const doReturn=()=>{
+      document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+      this.showGameUI();
+      if(GS._fromPause){
+        GS._fromPause=false;
         document.getElementById('pauseMenu').classList.add('open');
-        document.body.classList.add('game-active');
-        if(typeof TOUCH!=='undefined')TOUCH.showControls(TOUCH.isTouch());
-        fade.classList.remove('show');
-      },300);
-    } else if(GS._fromVictory){
-      GS._fromVictory=false;
-      const fade=document.getElementById('fadeOverlay');
-      fade.classList.add('show');
-      setTimeout(()=>{
-        document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
-        document.getElementById('hud').classList.add('active');
+      } else if(GS._fromVictory){
+        GS._fromVictory=false;
         document.getElementById('levelComplete').classList.add('show');
-        document.body.classList.add('game-active');
-        if(typeof TOUCH!=='undefined')TOUCH.showControls(TOUCH.isTouch());
-        fade.classList.remove('show');
-      },300);
-    } else if(GS._fromDeath){
-      GS._fromDeath=false;
-      const fade=document.getElementById('fadeOverlay');
-      fade.classList.add('show');
-      setTimeout(()=>{
-        document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
-        document.getElementById('hud').classList.add('active');
+      } else if(GS._fromDeath){
+        GS._fromDeath=false;
         document.getElementById('deathScreen').classList.add('show');
-        document.body.classList.add('game-active');
-        if(typeof TOUCH!=='undefined')TOUCH.showControls(false);
-        fade.classList.remove('show');
-      },300);
-    } else {
-      this.show('titleScreen');
-    }
+        // No touch controls on death/victory overlays
+        const tc=document.getElementById('touchControls');
+        if(tc){tc.classList.remove('active');tc.style.setProperty('display','none','important');}
+      } else {
+        // Fallback
+        this.hideGameUI();
+        this.show('titleScreen');
+        return;
+      }
+      fade.classList.remove('show');
+    };
+    setTimeout(doReturn,300);
   },
   toMenu(){
-    AU.sfx('uiBack');GS.running=false;GS.paused=false;
+    AU.sfx('uiBack');
+    GS.running=false;GS.paused=false;
     GS._fromPause=false;GS._fromVictory=false;GS._fromDeath=false;
     GS.enemies=[];GS.projs=[];GS.particles=[];
     document.getElementById('deathScreen').classList.remove('show');
     document.getElementById('levelComplete').classList.remove('show');
-    document.getElementById('pauseMenu').classList.remove('open');
-    document.getElementById('hud').classList.remove('active');
     document.getElementById('bossBar').classList.remove('vis');
-    // Remove game-active so HUD/touch controls are completely hidden on menus
-    document.body.classList.remove('game-active');
-    if(typeof TOUCH!=='undefined')TOUCH.showControls(false);
+    this.hideGameUI();
     this.show('titleScreen');
   },
   credits(){
