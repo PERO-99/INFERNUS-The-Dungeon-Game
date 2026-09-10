@@ -4451,7 +4451,12 @@ function doSkill(idx){
   sk.use();hudUpdate();buildSkillSlots();
 }
 function buildSkillSlots(){
-  const bar=document.getElementById('skillsBar');bar.innerHTML='';
+  const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
+  const bar=document.getElementById('skillsBar');
+  if(!bar)return;
+  // On touch devices, touch controls handle skills — skip the desktop bar entirely
+  if(isTouch){bar.style.setProperty('display','none','important');return;}
+  bar.innerHTML='';
   SKILLS.forEach((sk,i)=>{
     const slot=document.createElement('div');
     slot.className='skill-slot'+(PL.cds[i]>0?' on-cd':'');
@@ -5071,15 +5076,33 @@ const G={
     // Hide desktop skills bar
     const sb=document.getElementById('skillsBar');
     if(sb)sb.style.setProperty('display','none','important');
+    // Hide desktop rage panel
+    const rp=document.getElementById('ragePanel')||document.querySelector('.rage-panel');
+    if(rp)rp.style.setProperty('display','none','important');
   },
   // ── showGameUI: restore game UI when returning to game ──────────
   showGameUI(){
+    const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
     document.body.classList.add('game-active');
+    if(isTouch)document.body.classList.add('is-touch-device');
     const hud=document.getElementById('hud');
     if(hud){hud.style.display='';hud.classList.add('active');}
+    // Restore touch controls (remove our forced hide)
     const tc=document.getElementById('touchControls');
     if(tc){tc.style.removeProperty('display');}
-    if(typeof TOUCH!=='undefined')TOUCH.showControls(TOUCH.isTouch());
+    // Desktop skills bar: only restore on non-touch devices
+    const sb=document.getElementById('skillsBar');
+    if(sb){
+      if(isTouch){sb.style.setProperty('display','none','important');}
+      else{sb.style.removeProperty('display');}
+    }
+    // Desktop rage panel: only restore on non-touch devices
+    const rp=document.getElementById('ragePanel')||document.querySelector('.rage-panel');
+    if(rp){
+      if(isTouch){rp.style.setProperty('display','none','important');}
+      else{rp.style.removeProperty('display');}
+    }
+    if(typeof TOUCH!=='undefined')TOUCH.showControls(isTouch);
   },
   show(id){
     AU.sfx('ui');
@@ -7009,16 +7032,23 @@ window.TUTORIAL=TUTORIAL;window.PROGRESS=PROGRESS;window.NAMEDIT=NAMEDIT;
 
 if(typeof TOUCH!=='undefined')TOUCH.init();
 
-// JS-based safety: hide desktop game UI on touch devices
-// Fallback for browsers where @media(pointer:coarse) doesn't fire correctly
-(function(){
-  function applyTouchClass(){
-    const isTouch = window.matchMedia('(pointer:coarse)').matches || navigator.maxTouchPoints > 0;
-    if(isTouch) document.body.classList.add('is-touch-device');
+// ── MOBILE UI CLEANUP ─────────────────────────────────────────────
+// Directly hides desktop-only game UI on touch devices.
+// Inline !important styles — cannot be overridden by any CSS.
+(function runTouchFix(){
+  const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
+  if(!isTouch)return;
+  document.body.classList.add('is-touch-device');
+  function forceHide(sel){
+    const el=sel[0]==='#'?document.getElementById(sel.slice(1)):document.querySelector(sel);
+    if(el)el.style.setProperty('display','none','important');
   }
-  applyTouchClass();
-  setTimeout(applyTouchClass, 500);
-})();
+  forceHide('#skillsBar');    // desktop 1-5 skill slots bar
+  forceHide('.rage-panel');   // desktop rage orb/meter
+  forceHide('.ctrl-hint');    // keyboard hints
+  // Re-run after 500ms to catch any late DOM updates from buildSkillSlots etc.
+  setTimeout(runTouchFix,500);
+}());
 
 </script>
 </body>
