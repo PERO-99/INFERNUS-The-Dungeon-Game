@@ -3037,7 +3037,7 @@ body.is-touch-device .ctrl-hint{display:none!important;}
       <div class="combo-disp" id="comboDisp">×1 COMBO</div>
     </div>
   </div>
-  <div class="rage-panel">
+  <div class="rage-panel" id="ragePanel" style="display:none">
     <div class="rage-label">⚡ RAGE</div>
     <div class="rage-orb" id="rageOrb" onclick="PL.activateRage()" title="Press R for Rage">🔥<span class="rage-pct-text" id="ragePctText">0%</span></div>
   </div>
@@ -3047,7 +3047,7 @@ body.is-touch-device .ctrl-hint{display:none!important;}
   </div>
   <div class="kill-feed" id="killFeed" style="top:228px;right:14px;"></div>
   <div class="notif-area" id="notifArea"></div>
-  <div class="skills-bar" id="skillsBar"></div>
+  <div class="skills-bar" id="skillsBar" style="display:none"></div>
   <div class="xp-bar-wrap"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
   <div class="ctrl-hint">
     <div class="ctrl-kb">
@@ -4999,15 +4999,39 @@ const SH={
     AU.sfx('ui');this.sel=item;
     const owned=this.isOwned(item);const canBuy=PL.gold>=item.cost&&!owned&&item.cost>0;
     const sh=Object.entries(item.stats||{}).map(([k,v])=>`<div class="detail-stat"><span>${k}</span><span>${v}</span></div>`).join('');
-    document.getElementById('shopDetail').innerHTML=`
+    const detailHTML=`
       <span class="detail-icon"${item.liq?` style="--liq:${item.liq}"`:''}>${gicon(item.icon)}</span>
       <div class="detail-name">${item.name}</div>
       <div style="font-size:9px;color:${item.rc};letter-spacing:.2em;margin-bottom:7px;text-transform:uppercase">${item.rarity}</div>
       <div class="detail-desc">${item.desc}</div>
       <div class="detail-stats">${sh}</div>
       <button class="buy-btn" ${!canBuy?'disabled':''} onclick="SH.buy('${item.id}')">
-        ${owned?'✓ OWNED':item.cost===0?'✓ FREE':(`<span class="buy-ico">${gicon('coin')}</span>BUY — ${item.cost} Gold`)}</button>
+        ${owned?'\u2713 OWNED':item.cost===0?'\u2713 FREE':(`<span class="buy-ico">${gicon('coin')}</span>BUY \u2014 ${item.cost} Gold`)}</button>
       ${owned?`<button class="equip-btn" onclick="SH.equip('${item.id}')"><span class="equip-ico">${gicon('check')}</span>EQUIP NOW</button>`:''}`;
+
+    const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
+    if(isTouch){
+      this.showMobileSheet(item,detailHTML);
+    } else {
+      document.getElementById('shopDetail').innerHTML=detailHTML;
+    }
+  },
+  showMobileSheet(item,html){
+    let old=document.getElementById('shopMobileSheet');
+    if(old)old.remove();
+    let overlay=document.createElement('div');
+    overlay.id='shopMobileSheet';
+    overlay.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(0,0,0,.6);';
+    overlay.innerHTML=`
+      <div style="background:#1a0f05;border-top:2px solid #8B6914;border-radius:18px 18px 0 0;padding:20px 18px 32px;max-height:75vh;overflow-y:auto;pointer-events:auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-family:Cinzel,serif;font-size:14px;color:#D4AF37;letter-spacing:.15em;">ITEM DETAILS</div>
+          <button onclick="document.getElementById('shopMobileSheet').remove()" style="background:rgba(255,255,255,.12);border:none;color:#fff;font-size:18px;width:32px;height:32px;border-radius:50%;cursor:pointer;">&times;</button>
+        </div>
+        <div class="shop-panel" style="display:flex;flex-direction:column;gap:10px;background:none;border:none;padding:0;">${html}</div>
+      </div>`;
+    overlay.addEventListener('click',(e)=>{if(e.target===overlay)overlay.remove();});
+    document.body.appendChild(overlay);
   },
   buy(id){
     const item=(SHOP_DATA[this.curTab]||[]).find(i=>i.id===id);if(!item)return;
@@ -5018,6 +5042,8 @@ const SH={
     PL.inventory[this.curTab].push(id);
     document.getElementById('goldDisp').textContent=PL.gold;
     AU.sfx('buy');GS.notif('Purchased: '+item.name,'gold');
+    let sheet=document.getElementById('shopMobileSheet');
+    if(sheet)sheet.remove();
     if(this.curTab==='runes'){
       if(id==='r1')GS.runeEffects.rageMult=1.25;
       if(id==='r2')GS.runeEffects.dmgReduce=true;
