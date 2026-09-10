@@ -693,13 +693,52 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 @keyframes htpPlayPulse{0%,100%{box-shadow:0 0 25px rgba(180,0,0,.4),0 8px 20px rgba(0,0,0,.5)}50%{box-shadow:0 0 50px rgba(220,50,0,.65),0 8px 28px rgba(0,0,0,.55)}}
 
 /* ── CHARACTER SCREEN ── */
-#charScreen{background:radial-gradient(ellipse at center,#090F1A 0%,#040408 100%);}
-.char-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px;width:min(880px,92vw);}
+#charScreen{
+  background:radial-gradient(ellipse at center,#090F1A 0%,#040408 100%);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:clamp(16px,3vh,28px) 16px clamp(20px,4vh,40px);
+  justify-content:flex-start;
+  align-items:center;
+}
+.char-screen-header{
+  text-align:center;
+  width:100%;
+  position:relative;
+  margin-bottom:20px;
+}
+.char-back-btn{
+  position:fixed;
+  top:14px;
+  left:14px;
+  z-index:20;
+  background:rgba(0,0,0,.7);
+  border:1px solid rgba(212,175,55,.4);
+  color:rgba(212,175,55,.8);
+  font-size:16px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all .2s;
+  backdrop-filter:blur(6px);
+}
+.char-back-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(0,0,0,.85);}
+.char-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px;
+  width:min(1080px,96vw);
+  margin-bottom:24px;
+}
 .char-card{
-  background:linear-gradient(145deg,rgba(18,15,30,.95),rgba(10,8,20,.98));
+  background:linear-gradient(145deg,rgba(18,15,30,.96),rgba(10,8,22,.99));
   border:2px solid rgba(60,50,90,.6);
   border-top:2px solid rgba(90,70,140,.4);
-  padding:20px 14px;
+  padding:0 0 16px;
   cursor:pointer;
   transition:all .3s cubic-bezier(0.25,0.46,0.45,0.94);
   position:relative;
@@ -708,30 +747,189 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   backdrop-filter:blur(8px);
 }
 .char-card:hover{
-  border-color:rgba(212,175,55,.7);
-  border-top-color:rgba(255,215,0,.8);
-  transform:scale(1.05) translateY(-3px);
-  box-shadow:0 20px 50px rgba(0,0,0,.7),0 0 30px rgba(212,175,55,.2);
+  border-color:rgba(212,175,55,.75);
+  border-top-color:rgba(255,215,0,.85);
+  transform:scale(1.04) translateY(-4px);
+  box-shadow:0 24px 55px rgba(0,0,0,.75),0 0 35px rgba(212,175,55,.22);
 }
 .char-card.selected{
   border-color:var(--gold-bright);
   border-top-color:var(--gold-bright);
   background:rgba(212,175,55,.09);
-  box-shadow:0 0 40px rgba(212,175,55,.3);
+  box-shadow:0 0 40px rgba(212,175,55,.35),inset 0 0 30px rgba(212,175,55,.05);
 }
-.char-portrait-wrap{position:relative;width:100%;height:110px;margin-bottom:9px;border-radius:4px;overflow:hidden;
-  background:radial-gradient(ellipse at 50% 78%,rgba(212,175,55,.18) 0%,transparent 65%),linear-gradient(180deg,rgba(255,255,255,.04),transparent 40%);}
-.char-portrait-wrap::after{content:'';position:absolute;left:50%;bottom:9px;width:52px;height:9px;transform:translateX(-50%);
-  background:radial-gradient(ellipse,rgba(0,0,0,.55) 0%,transparent 75%);}
-.char-portrait{position:relative;width:100%;height:100%;z-index:1;}
-.char-card:hover .char-portrait-wrap{background:radial-gradient(ellipse at 50% 78%,rgba(212,175,55,.3) 0%,transparent 65%),linear-gradient(180deg,rgba(255,255,255,.06),transparent 40%);}
-.char-name{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:4px;}
-.char-class{font-size:9px;color:var(--text-dim);text-align:center;letter-spacing:.22em;margin-bottom:12px;text-transform:uppercase;}
+/* Role badge on top of card */
+.char-role-badge{
+  position:absolute;
+  top:0;
+  right:0;
+  padding:4px 10px;
+  font-family:'Rajdhani',sans-serif;
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:#fff;
+  clip-path:polygon(0 0,100% 0,100% 100%,8px 100%);
+  z-index:3;
+}
+.char-portrait-wrap{
+  position:relative;
+  width:100%;
+  height:150px;
+  margin-bottom:12px;
+  overflow:hidden;
+  background:radial-gradient(ellipse at 50% 80%,rgba(212,175,55,.2) 0%,transparent 70%),
+             linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(0,0,0,.3) 100%);
+}
+.char-portrait-wrap::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:inherit;
+  filter:blur(0);
+  z-index:0;
+}
+.char-portrait-wrap::after{
+  content:'';
+  position:absolute;
+  left:50%;
+  bottom:10px;
+  width:60px;
+  height:10px;
+  transform:translateX(-50%);
+  background:radial-gradient(ellipse,rgba(0,0,0,.6) 0%,transparent 75%);
+  z-index:2;
+}
+.char-card:hover .char-portrait-wrap{
+  background:radial-gradient(ellipse at 50% 80%,rgba(212,175,55,.32) 0%,transparent 70%),
+             linear-gradient(180deg,rgba(255,255,255,.07) 0%,rgba(0,0,0,.15) 100%);
+}
+.char-portrait{
+  position:relative;
+  width:100%;
+  height:100%;
+  z-index:1;
+}
+.char-card-body{
+  padding:0 14px;
+}
+.char-name{
+  font-family:'Cinzel',serif;
+  font-size:14px;
+  font-weight:700;
+  color:var(--gold);
+  text-align:center;
+  margin-bottom:2px;
+  letter-spacing:.08em;
+}
+.char-class{
+  font-size:9px;
+  color:rgba(180,160,220,.75);
+  text-align:center;
+  letter-spacing:.28em;
+  margin-bottom:12px;
+  text-transform:uppercase;
+}
+.char-divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,175,55,.4) 50%,transparent);
+  margin-bottom:10px;
+}
 .stat-row{display:flex;align-items:center;gap:6px;font-size:9px;margin-bottom:3px;}
 .stat-label{color:var(--text-dim);width:28px;flex-shrink:0;font-size:9px;}
 .stat-bar{flex:1;height:4px;background:rgba(60,50,80,.8);border-radius:2px;overflow:hidden;}
 .stat-fill{height:100%;border-radius:2px;transition:width .5s ease;}
-.char-lore{font-size:9px;color:var(--text-dim);text-align:center;line-height:1.5;margin-top:8px;font-style:italic;}
+/* Abilities section */
+.char-abilities{
+  margin-top:10px;
+  border-top:1px solid rgba(60,50,80,.6);
+  padding-top:8px;
+}
+.char-abilities-label{
+  font-size:7px;
+  letter-spacing:.3em;
+  color:rgba(180,140,220,.6);
+  text-transform:uppercase;
+  margin-bottom:6px;
+  text-align:center;
+}
+.char-skill-list{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.char-skill-item{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:9px;
+  color:rgba(210,190,230,.75);
+  padding:2px 0;
+}
+.char-skill-dot{
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  flex-shrink:0;
+  background:var(--mc-skill,rgba(160,100,255,.8));
+  box-shadow:0 0 6px var(--mc-skill,rgba(160,100,255,.5));
+}
+.char-lore{
+  font-size:9px;
+  color:var(--text-dim);
+  text-align:center;
+  line-height:1.5;
+  margin-top:8px;
+  font-style:italic;
+  display:none; /* hidden by default, shown on hover desktop via CSS */
+}
+/* SELECT button that appears inside selected card */
+.char-select-confirm-bar{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  align-items:center;
+  width:min(800px,96vw);
+  margin-top:4px;
+  flex-wrap:wrap;
+}
+.char-select-btn{
+  padding:14px 36px;
+  background:linear-gradient(135deg,rgba(139,0,0,.95),rgba(80,0,0,.98),rgba(50,0,0,1));
+  border:1px solid rgba(220,60,30,.7);
+  border-top:1px solid rgba(255,100,60,.4);
+  color:var(--text);
+  font-family:'Cinzel',serif;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.25em;
+  cursor:pointer;
+  transition:all .25s;
+  text-transform:uppercase;
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+  box-shadow:0 0 28px rgba(139,0,0,.4),0 8px 24px rgba(0,0,0,.5);
+  animation:selectPulse 2s ease-in-out infinite;
+  position:relative;
+  overflow:hidden;
+}
+.char-select-btn::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(255,100,0,.15),transparent 60%);
+  pointer-events:none;
+}
+.char-select-btn:hover{
+  background:linear-gradient(135deg,rgba(200,20,20,.98),rgba(140,0,0,1));
+  box-shadow:0 0 50px rgba(200,30,0,.65),0 8px 30px rgba(0,0,0,.5);
+  transform:translateY(-2px) scale(1.02);
+}
+.char-select-btn:active{transform:translateY(0) scale(.99);}
+@keyframes selectPulse{
+  0%,100%{box-shadow:0 0 20px rgba(139,0,0,.35),0 8px 24px rgba(0,0,0,.5)}
+  50%{box-shadow:0 0 45px rgba(200,60,0,.6),0 8px 30px rgba(0,0,0,.5)}
+}
 
 /* ── SHOP SCREEN ── */
 #shopScreen{background:radial-gradient(ellipse at center,#0E0905 0%,#040408 100%);}
@@ -1060,13 +1258,13 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   align-items:center;
   gap:0;
   width:min(380px,88vw);
-  background:linear-gradient(145deg,rgba(15,8,28,.92),rgba(8,5,18,.95));
-  border:1px solid rgba(100,60,160,.5);
-  border-top:2px solid rgba(180,100,220,.5);
+  background:linear-gradient(145deg,rgba(35,20,60,.95),rgba(20,12,45,.97));
+  border:1px solid rgba(160,100,220,.65);
+  border-top:2px solid rgba(210,140,255,.6);
   padding:40px 36px 32px;
   backdrop-filter:blur(20px);
   clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,18px 100%,0 calc(100% - 18px));
-  box-shadow:0 30px 80px rgba(0,0,0,.8),0 0 40px rgba(120,60,200,.12),inset 0 1px 0 rgba(255,255,255,.06);
+  box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 60px rgba(150,80,240,.2),inset 0 1px 0 rgba(255,255,255,.1);
 }
 .login-sigil{
   font-size:48px;
@@ -1092,43 +1290,46 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 .login-sub{
   font-size:9px;
   letter-spacing:.4em;
-  color:rgba(200,100,50,.8);
+  color:rgba(220,130,70,.95);
   margin-bottom:28px;
   text-transform:uppercase;
 }
 .login-field-wrap{
   width:100%;
   position:relative;
-  margin-bottom:12px;
+  margin-bottom:14px;
 }
 .login-field-label{
   display:block;
-  font-size:8px;
+  font-size:9px;
   letter-spacing:.3em;
-  color:rgba(140,110,70,.8);
-  margin-bottom:5px;
+  color:rgba(220,190,150,1);
+  margin-bottom:6px;
   text-transform:uppercase;
+  font-weight:600;
 }
 .login-input{
   width:100%;
-  padding:12px 14px;
-  background:rgba(0,0,0,.5);
-  border:1px solid rgba(80,55,120,.5);
-  border-bottom:2px solid rgba(120,80,160,.4);
-  color:var(--gold-bright);
+  padding:13px 16px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(180,130,220,.55);
+  border-bottom:2px solid rgba(200,150,255,.55);
+  color:#fff;
   font-family:'Cinzel',serif;
-  font-size:13px;
+  font-size:14px;
   letter-spacing:.1em;
   outline:none;
   transition:all .22s;
   clip-path:polygon(3px 0,100% 0,100% 100%,0 100%,0 3px);
+  box-shadow:inset 0 1px 4px rgba(0,0,0,.3);
 }
-.login-input::placeholder{color:rgba(120,100,70,.5);font-size:11px;letter-spacing:.15em;}
+.login-input::placeholder{color:rgba(200,170,230,.55);font-size:11px;letter-spacing:.15em;}
 .login-input:focus{
-  border-color:rgba(180,130,50,.7);
-  border-bottom-color:var(--gold);
-  background:rgba(20,12,35,.8);
-  box-shadow:0 0 20px rgba(212,175,55,.1),inset 0 0 10px rgba(212,175,55,.04);
+  border-color:rgba(212,175,55,.85);
+  border-bottom-color:var(--gold-bright);
+  background:rgba(255,255,255,.13);
+  box-shadow:0 0 22px rgba(212,175,55,.2),inset 0 0 12px rgba(212,175,55,.06);
+  color:var(--gold-bright);
 }
 .login-btn-row{width:100%;display:flex;flex-direction:column;gap:10px;margin-top:8px;}
 .login-btn-main{
@@ -1874,18 +2075,22 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 }
 
 @media(max-width:700px){
-  .mode-panels{flex-direction:column;height:auto;min-height:100vh;}
-  .mode-panel{flex:none!important;width:100%;min-height:22vh;max-height:28vh;}
-  .mode-panel:hover{flex:none!important;min-height:28vh;}
+  .mode-panels{flex-direction:column;height:auto;min-height:100vh;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .mode-panel{flex:none!important;width:100%;min-height:28vh;max-height:none;}
+  .mode-panel:hover{flex:none!important;min-height:30vh;}
   .mode-panel-vtag{writing-mode:horizontal-tb;transform:none;left:20px;top:50%;transform:translateY(-50%)!important;}
   .mode-panel-num{font-size:28px;top:8px;right:12px;}
   .mode-panel-badge{top:10px;left:10px;}
   .mode-panel-content{padding:10px 16px 14px;}
   .mode-panel-icon{font-size:28px;margin-bottom:4px;}
   .mode-panel-name{font-size:clamp(14px,4vw,18px);}
-  .mode-panel-desc{font-size:clamp(9px,2.5vw,11px);max-width:none;}
+  .mode-panel-desc{font-size:clamp(9px,2.5vw,11px);max-width:none;color:rgba(220,200,175,.7)!important;}
+  .mode-panel:hover .mode-panel-desc{color:rgba(220,200,175,.9)!important;}
   .mode-header-title{font-size:clamp(18px,5vw,28px);}
   .mode-return-btn{bottom:10px;right:10px;padding:8px 14px;font-size:10px;}
+  /* Scroll indicator */
+  #modeScreen::after{content:"↓ Scroll for more modes";position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.3em;color:rgba(212,175,55,.6);pointer-events:none;animation:scrollHint 2s ease-in-out infinite;z-index:20;}
+  @keyframes scrollHint{0%,100%{opacity:.4;transform:translateX(-50%) translateY(0)}50%{opacity:.9;transform:translateX(-50%) translateY(-3px)}}
 }
 
 @media(max-width:600px){
@@ -1913,13 +2118,17 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 }
 
 @media(max-width:600px){
-  .char-grid{grid-template-columns:repeat(2,1fr);gap:8px;width:min(380px,95vw);}
-  .char-card{padding:12px 10px;}
-  .char-portrait-wrap{height:80px;}
+  .char-grid{grid-template-columns:repeat(2,1fr);gap:10px;width:min(440px,97vw);}
+  .char-card{padding:0 0 12px;}
+  .char-card-body{padding:0 10px;}
+  .char-portrait-wrap{height:120px;}
   .char-name{font-size:11px;}
   .char-class{font-size:8px;margin-bottom:8px;}
   .stat-row{font-size:8px;}
-  .char-lore{display:none;}
+  .char-abilities-label{font-size:7px;}
+  .char-skill-item{font-size:8px;}
+  .char-back-btn{top:8px;left:8px;}
+  .char-select-btn{padding:12px 24px;font-size:11px;}
 }
 
 @media(max-width:600px){
@@ -2024,30 +2233,33 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 
 /* RIGHT-SIDE BUTTONS — all bottom-anchored to avoid overlap */
 /* Layout from bottom-right, stacking upward:
-   ATK  = bottom 18px  (76px tall)
-   DODGE= bottom 106px (56px tall)
-   RAGE = bottom 176px (56px tall)
-   HP   = bottom 246px (52px tall)
-   MP   = bottom 310px (52px tall)
+   ATK  = bottom 18px  (76px tall) — dominant button
+   DODGE= bottom 108px (58px tall)
+   RAGE = bottom 180px (58px tall) 
+   
+   LEFT SIDE:
+   Joy  = bottom 28px  (130px — joystick)
+   HP   = bottom 172px (50px tall, left of skills)
+   MP   = bottom 230px (50px tall, left of skills)
+   Skills row = bottom 175px left side (above joy, but left of HP/MP)
 */
 .tc-dodge{
-  width:56px;height:56px;
-  bottom:calc(106px + env(safe-area-inset-bottom,0px));
-  right:21px;
+  width:60px;height:60px;
+  bottom:calc(108px + env(safe-area-inset-bottom,0px));
+  right:16px;
   background:radial-gradient(circle at 40% 35%,rgba(60,80,200,.85),rgba(20,30,120,.95));
-  border-color:rgba(100,140,255,.45);
-  box-shadow:0 0 16px rgba(80,100,255,.4),0 4px 12px rgba(0,0,0,.5);
+  border-color:rgba(100,140,255,.5);
+  box-shadow:0 0 18px rgba(80,100,255,.45),0 4px 14px rgba(0,0,0,.55);
   color:#aaccff;font-size:9px;
 }
 
 .tc-rage{
-  width:56px;height:56px;
-  /* Moved from top:50% to bottom-anchored — no more overlap */
-  bottom:calc(176px + env(safe-area-inset-bottom,0px));
-  right:12px;
+  width:60px;height:60px;
+  bottom:calc(182px + env(safe-area-inset-bottom,0px));
+  right:16px;
   background:radial-gradient(circle at 40% 35%,rgba(220,100,0,.8),rgba(120,40,0,.95));
-  border-color:rgba(255,160,0,.45);
-  box-shadow:0 0 18px rgba(255,120,0,.35),0 4px 12px rgba(0,0,0,.5);
+  border-color:rgba(255,160,0,.5);
+  box-shadow:0 0 20px rgba(255,120,0,.4),0 4px 14px rgba(0,0,0,.55);
   color:#FFD000;font-size:9px;
   border-radius:14px;
 }
@@ -2058,27 +2270,28 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 }
 @keyframes tcRagePulse{0%,100%{box-shadow:0 0 22px rgba(255,160,0,.5)}50%{box-shadow:0 0 40px rgba(255,200,0,.9)}}
 
+/* POTIONS — moved to LEFT side of screen above joystick */
 .tc-potion-hp{
   width:52px;height:52px;
-  /* Moved from top:50% to bottom-anchored */
-  bottom:calc(246px + env(safe-area-inset-bottom,0px));
-  right:14px;
+  bottom:calc(172px + env(safe-area-inset-bottom,0px));
+  left:22px; /* left side, above joystick */
+  right:auto;
   border-radius:14px;
-  background:radial-gradient(circle at 40% 35%,rgba(0,160,50,.75),rgba(0,80,20,.95));
-  border-color:rgba(0,220,80,.4);
-  box-shadow:0 0 14px rgba(0,200,60,.3),0 4px 10px rgba(0,0,0,.5);
+  background:radial-gradient(circle at 40% 35%,rgba(0,180,60,.78),rgba(0,90,25,.96));
+  border-color:rgba(0,240,90,.45);
+  box-shadow:0 0 16px rgba(0,210,70,.35),0 4px 12px rgba(0,0,0,.55);
   color:#55FF88;font-size:9px;
 }
 
 .tc-potion-mp{
   width:52px;height:52px;
-  /* Moved from top:50% to bottom-anchored */
-  bottom:calc(310px + env(safe-area-inset-bottom,0px));
-  right:14px;
+  bottom:calc(234px + env(safe-area-inset-bottom,0px));
+  left:22px; /* left side, above HP */
+  right:auto;
   border-radius:14px;
-  background:radial-gradient(circle at 40% 35%,rgba(30,80,220,.75),rgba(10,30,120,.95));
-  border-color:rgba(80,140,255,.4);
-  box-shadow:0 0 14px rgba(80,140,255,.3),0 4px 10px rgba(0,0,0,.5);
+  background:radial-gradient(circle at 40% 35%,rgba(40,90,240,.78),rgba(10,35,130,.96));
+  border-color:rgba(90,155,255,.45);
+  box-shadow:0 0 16px rgba(90,155,255,.35),0 4px 12px rgba(0,0,0,.55);
   color:#88BBFF;font-size:9px;
 }
 
@@ -2100,17 +2313,18 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   position:absolute;
 }
 
+/* SKILLS ROW — sits above potions on the left side */
 .tc-skills-row{
   position:absolute;
-  /* Sits ABOVE the joystick — safe from right-side buttons */
-  bottom:calc(175px + env(safe-area-inset-bottom,0px));
-  left:14px;
+  bottom:calc(298px + env(safe-area-inset-bottom,0px));
+  left:6px;
   right:90px; /* don't intrude into right-button zone */
-  display:flex;flex-direction:row;gap:6px;
+  display:flex;flex-direction:row;gap:5px;
   justify-content:flex-start;
   pointer-events:none;
   padding:0 2px;
-  flex-wrap:nowrap;
+  flex-wrap:wrap; /* allow wrapping into 2 rows if needed */
+  max-height:100px;
   overflow:hidden;
 }
 .tc-skill-btn{
@@ -2156,17 +2370,20 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 @media(pointer:coarse) and (max-height:680px){
   /* Compress the right-side stack for shorter phones */
   .tc-atk{width:68px;height:68px;bottom:calc(12px + env(safe-area-inset-bottom,0px));}
-  .tc-dodge{width:50px;height:50px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
-  .tc-rage{width:50px;height:50px;bottom:calc(154px + env(safe-area-inset-bottom,0px));}
-  .tc-potion-hp{width:46px;height:46px;bottom:calc(216px + env(safe-area-inset-bottom,0px));}
-  .tc-potion-mp{width:46px;height:46px;bottom:calc(274px + env(safe-area-inset-bottom,0px));}
+  .tc-dodge{width:52px;height:52px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
+  .tc-rage{width:52px;height:52px;bottom:calc(156px + env(safe-area-inset-bottom,0px));}
+  .tc-potion-hp{width:46px;height:46px;bottom:calc(156px + env(safe-area-inset-bottom,0px));left:20px;}
+  .tc-potion-mp{width:46px;height:46px;bottom:calc(212px + env(safe-area-inset-bottom,0px));left:20px;}
+  .tc-skills-row{bottom:calc(266px + env(safe-area-inset-bottom,0px));}
   .tc-skill-btn{width:38px;height:38px;}
   .tc-skill-btn .sk-icon{font-size:16px;}
 }
 @media(pointer:coarse) and (max-width:380px){
-  /* Narrow phones: skills row left offset adjusted */
-  .tc-skills-row{left:158px;gap:4px;}
+  /* Narrow phones: skills row and potions adjusted */
+  .tc-skills-row{left:4px;gap:4px;right:85px;}
   .tc-skill-btn{width:36px;height:36px;}
+  .tc-potion-hp{left:18px;}
+  .tc-potion-mp{left:18px;}
 }
 
 /* ── MOBILE RESPONSIVE OVERRIDES ──────────────────────────── */
@@ -2221,8 +2438,8 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   #shopScreen .shop-sidebar{width:100%!important;max-height:30vh;overflow-y:auto;}
   #shopScreen .shop-main{width:100%!important;}
   /* Mode select stack fully on tiny screens */
-  .mode-panels{flex-direction:column!important;}
-  .mode-panel{flex:0 0 25vh!important;min-height:unset!important;}
+  .mode-panels{flex-direction:column!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;}
+  .mode-panel{flex:0 0 28vh!important;min-height:unset!important;max-height:none!important;}
 }
 /* Safe area insets for iPhone notch/home bar */
 @supports(padding: max(0px)){
@@ -2408,12 +2625,17 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 <div class="screen hidden" id="charScreen">
   <div class="cine-vignette"></div>
   <div class="cine-grain"></div>
-  <div class="sc-title">Choose Your Warrior</div>
-  <div class="sc-sub">EACH CARRIES A DIFFERENT DESTINY</div>
+  <!-- Back button top-left fixed -->
+  <button class="char-back-btn" onclick="G.show('titleScreen')" title="Back">&#8592;</button>
+  <div class="char-screen-header">
+    <div class="sc-title">Choose Your Warrior</div>
+    <div class="sc-sub">EACH CARRIES A DIFFERENT DESTINY</div>
+  </div>
   <div class="char-grid" id="charGrid"></div>
-  <div style="display:flex;gap:13px;align-items:center;flex-wrap:wrap;justify-content:center;">
-    <button class="back-btn" style="margin-top:0" onclick="G.show('titleScreen')"><span data-icon="chevron"></span>Return</button>
-    <button class="mbtn primary" style="margin-top:20px;width:290px;padding-left:24px;padding-right:24px;white-space:nowrap" onclick="G.confirmChar()"><span class="mbtn-ico" data-icon="check"></span>Confirm Warrior</button>
+  <div class="char-select-confirm-bar">
+    <button class="char-select-btn" id="charConfirmBtn" onclick="G.confirmChar()">
+      &#10022; SELECT WARRIOR
+    </button>
   </div>
 </div>
 <div class="screen hidden" id="shopScreen">
@@ -3779,50 +4001,52 @@ function flushHud(){
 }
 // ── BIOMES CONFIG ──────────────────────────────────────────────
 const BIOMES=[
-  { // 0: Infernal Dungeon (original, improved)
+  { // 0: Infernal Dungeon
     name:'Infernal Dungeon',
     floor1:'#0E0E1A', floor2:'#111122', grid:'rgba(45,45,75,.28)',
     wall:'#07070E', wallStroke:'#1A1A28',
     border:'rgba(139,0,0,.35)',
     torchCol:'#FF4500', torchGlow:'rgba(255,150,0,.',
     runeCol:'#6644CC', runeGlow:'rgba(100,50,200,.',
-    decorType:'torch'
+    decorType:'torch', bright:false
   },
-  { // 1: Crystal Cavern (NEW - bright cyan)
+  { // 1: Crystal Cavern (cool cyan)
     name:'Crystal Cavern',
     floor1:'#0A1A2E', floor2:'#0D2240', grid:'rgba(0,180,255,.18)',
     wall:'#08101E', wallStroke:'#0D2035',
     border:'rgba(0,200,255,.5)',
     torchCol:'#00D4FF', torchGlow:'rgba(0,200,255,.',
     runeCol:'#00AAFF', runeGlow:'rgba(0,150,255,.',
-    decorType:'crystal'
+    decorType:'crystal', bright:false
   },
-  { // 2: Enchanted Forest (NEW - bright green)
-    name:'Enchanted Forest',
-    floor1:'#061408', floor2:'#081A0A', grid:'rgba(0,200,50,.18)',
-    wall:'#04100A', wallStroke:'#0A1E0C',
-    border:'rgba(50,255,80,.45)',
-    torchCol:'#39FF14', torchGlow:'rgba(50,255,50,.',
-    runeCol:'#22FF88', runeGlow:'rgba(30,200,80,.',
-    decorType:'mushroom'
+  { // 2: Sunlit Forest (BRIGHT DAY — greens & sky blue)
+    name:'Sunlit Forest',
+    floor1:'#2A4A1A', floor2:'#324E20', grid:'rgba(80,200,40,.22)',
+    wall:'#1A3010', wallStroke:'#2A4818',
+    border:'rgba(100,220,40,.6)',
+    torchCol:'#88FF44', torchGlow:'rgba(100,240,50,.',
+    runeCol:'#AAFF44', runeGlow:'rgba(120,255,50,.',
+    decorType:'forest', bright:true,
+    skyCol:'rgba(100,200,255,.18)', groundCol:'rgba(60,180,30,.15)'
   },
-  { // 3: Abyssal Void (NEW - electric violet)
-    name:'Abyssal Void',
-    floor1:'#0D0014', floor2:'#110019', grid:'rgba(150,0,255,.18)',
-    wall:'#06000E', wallStroke:'#0E0018',
-    border:'rgba(180,0,255,.55)',
-    torchCol:'#BF00FF', torchGlow:'rgba(180,0,255,.',
-    runeCol:'#9900FF', runeGlow:'rgba(140,0,255,.',
-    decorType:'void'
+  { // 3: Sacred Meadow (BRIGHT DAY — golden sun & flowers)
+    name:'Sacred Meadow',
+    floor1:'#3A4010', floor2:'#424818', grid:'rgba(220,200,40,.20)',
+    wall:'#28300A', wallStroke:'#384010',
+    border:'rgba(255,220,40,.65)',
+    torchCol:'#FFE844', torchGlow:'rgba(255,230,50,.',
+    runeCol:'#FFD700', runeGlow:'rgba(255,200,20,.',
+    decorType:'meadow', bright:true,
+    skyCol:'rgba(255,230,100,.15)', groundCol:'rgba(160,200,30,.12)'
   },
-  { // 4: Storm Fortress (NEW - gold/electric)
+  { // 4: Storm Fortress (gold/electric)
     name:'Storm Fortress',
     floor1:'#141420', floor2:'#1A1A2A', grid:'rgba(255,200,0,.14)',
     wall:'#0C0C16', wallStroke:'#16162A',
     border:'rgba(255,200,0,.4)',
     torchCol:'#FFD700', torchGlow:'rgba(255,200,0,.',
     runeCol:'#4488FF', runeGlow:'rgba(50,100,255,.',
-    decorType:'lightning'
+    decorType:'lightning', bright:false
   }
 ];
 
@@ -3908,8 +4132,8 @@ const GS={
   startWave(){
     this.waveComplete=false;this.enemies=[];this.projs=[];
     this.bossWave=this.wave%5===0;
-    // Advance biome every 5 waves (biomes 0-4 cycle)
-    this.biome=Math.floor((this.wave-1)/5)%BIOMES.length;
+    // Advance biome every 3 waves (biomes 0-4 cycle)
+    this.biome=Math.floor((this.wave-1)/3)%BIOMES.length;
     document.getElementById('waveBadge').textContent=`WAVE ${this.wave}`;
     this.notif(`⚔ WAVE ${this.wave} — ${BIOMES[this.biome].name.toUpperCase()}`,'red');AU.sfx('wave');
     if(this.bossWave){
@@ -4387,6 +4611,90 @@ function drawDungeon(){
         C.beginPath();C.arc(s.x,s.y-60,3,0,Math.PI*2);C.fill();
       }
     });
+  } else if(BM.decorType==='forest'){
+    // BRIGHT SUNLIT FOREST — trees, grass tufts, flowers
+    // Sky gradient overlay
+    if(BM.skyCol){
+      const skyG=C.createLinearGradient(0,0,0,CNV.height*.4);
+      skyG.addColorStop(0,BM.skyCol);skyG.addColorStop(1,'rgba(0,0,0,0)');
+      C.fillStyle=skyG;C.fillRect(0,0,CNV.width,CNV.height*.4);
+    }
+    pillars.forEach((p,pi)=>{
+      const s=CAM.ws(p[0],p[1]);
+      if(s.x<-100||s.x>CNV.width+100||s.y<-100||s.y>CNV.height+100)return;
+      const sway=Math.sin(nowCache*.002+pi)*.8;
+      const h=60+pi%3*15;
+      // Tree trunk
+      C.fillStyle='#5A3510';C.fillRect(s.x-6,s.y-h+20,12,h);
+      // Tree foliage (layered circles)
+      ['rgba(30,140,20,.9)','rgba(50,180,30,.85)','rgba(70,200,40,.8)'].forEach((col,li)=>{
+        C.fillStyle=col;
+        C.beginPath();C.arc(s.x+sway*li,s.y-h-li*12,22-li*4,0,Math.PI*2);C.fill();
+      });
+      // Sun highlight on top leaf
+      C.fillStyle='rgba(200,255,150,.35)';
+      C.beginPath();C.ellipse(s.x+sway-6,s.y-h-30,9,5,-0.5,0,Math.PI*2);C.fill();
+      // Grass tufts at base
+      for(let g=0;g<5;g++){
+        const gx=s.x-20+g*10+sway;
+        C.strokeStyle=`rgba(${60+g*10},${160+g*8},${30+g*5},.9)`;C.lineWidth=2;
+        C.beginPath();C.moveTo(gx,s.y+25);C.quadraticCurveTo(gx-4,s.y+10,gx-2,s.y);C.stroke();
+        C.beginPath();C.moveTo(gx,s.y+25);C.quadraticCurveTo(gx+4,s.y+10,gx+2,s.y);C.stroke();
+      }
+      // Occasional flower
+      if(pi%2===0){
+        const fColors=['#FF88AA','#FFFF44','#FF6688','#FF44AA'];
+        const fc=fColors[pi%fColors.length];
+        C.fillStyle=fc;
+        C.beginPath();C.arc(s.x-15+sway,s.y+20,5,0,Math.PI*2);C.fill();
+        C.fillStyle='#FFD700';C.beginPath();C.arc(s.x-15+sway,s.y+20,2,0,Math.PI*2);C.fill();
+      }
+    });
+  } else if(BM.decorType==='meadow'){
+    // BRIGHT SACRED MEADOW — flowers, sunbeams, golden light
+    // Warm sky overlay
+    if(BM.skyCol){
+      const skyG=C.createLinearGradient(0,0,0,CNV.height*.5);
+      skyG.addColorStop(0,BM.skyCol);skyG.addColorStop(1,'rgba(0,0,0,0)');
+      C.fillStyle=skyG;C.fillRect(0,0,CNV.width,CNV.height*.5);
+    }
+    // Sunbeam from top center
+    const sunX=CNV.width*.5,sunY=-30;
+    const sunBeam=C.createRadialGradient(sunX,sunY,10,sunX,sunY,CNV.height*.8);
+    sunBeam.addColorStop(0,`rgba(255,240,100,${.12+.04*Math.sin(nowCache*.001)})`);
+    sunBeam.addColorStop(1,'rgba(255,220,60,0)');
+    C.fillStyle=sunBeam;C.fillRect(0,0,CNV.width,CNV.height);
+    pillars.forEach((p,pi)=>{
+      const s=CAM.ws(p[0],p[1]);
+      if(s.x<-100||s.x>CNV.width+100||s.y<-100||s.y>CNV.height+100)return;
+      const sway=Math.sin(nowCache*.0018+pi*.7)*.7;
+      // Flower stem
+      C.strokeStyle='rgba(60,160,20,.9)';C.lineWidth=3;
+      C.beginPath();C.moveTo(s.x,s.y+30);
+      C.quadraticCurveTo(s.x+sway*8,s.y,s.x+sway*3,s.y-20);C.stroke();
+      // Petals
+      const flowerCols=['#FF88BB','#FF6699','#FFD700','#FF44AA','#FF8C00','#FFCC44'];
+      const fc=flowerCols[pi%flowerCols.length];
+      for(let fp=0;fp<6;fp++){
+        const fa=fp/6*Math.PI*2;
+        C.fillStyle=fc+'CC';
+        C.beginPath();
+        C.ellipse(s.x+sway*3+Math.cos(fa)*10,s.y-20+Math.sin(fa)*10,7,4,fa,0,Math.PI*2);
+        C.fill();
+      }
+      // Center
+      C.fillStyle='#FFD700';C.beginPath();C.arc(s.x+sway*3,s.y-20,5,0,Math.PI*2);C.fill();
+      // Gold sparkle
+      const sp=.4+.4*Math.sin(nowCache*.005+pi);
+      C.fillStyle=`rgba(255,220,50,${sp})`;
+      C.beginPath();C.arc(s.x+sway*3,s.y-20,2,0,Math.PI*2);C.fill();
+      // Small grass tufts
+      for(let g=0;g<4;g++){
+        const gx=s.x-15+g*10+sway;
+        C.strokeStyle=`rgba(80,${170+g*12},40,.8)`;C.lineWidth=1.5;
+        C.beginPath();C.moveTo(gx,s.y+30);C.lineTo(gx+2+sway,s.y+15);C.stroke();
+      }
+    });
   }
 
   // ── Rune glyphs on floor ──
@@ -4780,27 +5088,37 @@ const G={
   },
   buildChars(){
     const grid=document.getElementById('charGrid');grid.innerHTML='';
+    const roleMap={berserker:'Tank',mage:'Mage',rogue:'Assassin',paladin:'Guardian',huntress:'Ranger'};
     CHARS.forEach(ch=>{
       const saved=NAMEDIT.load(ch.id);
       const displayName=saved||ch.name;
       const card=document.createElement('div');
       card.className='char-card'+(ch.id===this.selChar.id?' selected':'');
       card.onclick=()=>{AU.sfx('ui');this.selChar=ch;document.querySelectorAll('.char-card').forEach(c=>c.classList.remove('selected'));card.classList.add('selected');};
-      card.innerHTML=`<div class="char-portrait-wrap"><canvas class="char-portrait" width="120" height="140" data-cls="${ch.id}"></canvas></div>
-        <div class="char-name">${displayName}<button class="char-name-edit-btn" title="Rename" onclick="event.stopPropagation();NAMEDIT.open('${ch.id}','${displayName}')">✏</button></div>
-        <div class="char-class">${ch.cls.toUpperCase()}</div>
-        <div class="char-stats">
-          ${['str','vit','agi','int','luck'].map(s=>`
-            <div class="stat-row">
-              <span class="stat-label">${s.slice(0,3).toUpperCase()}</span>
-              <div class="stat-bar"><div class="stat-fill" style="width:${ch.bars[s]}%;background:${
-                s==='str'?'#CC2200':s==='vit'?'#00CC44':s==='agi'?'#00AACC':s==='int'?'#8800CC':'#CCAA00'}"></div></div>
-            </div>`).join('')}
+      const skillDots=(ch.skills||[]).map(sk=>`<div class="char-skill-item" style="--mc-skill:${ch.col}"><span class="char-skill-dot"></span>${sk}</div>`).join('');
+      const statBars=['str','vit','agi','int','luck'].map(s=>{
+        const gradMap={str:'linear-gradient(90deg,#660000,#CC2200)',vit:'linear-gradient(90deg,#005500,#00CC44)',agi:'linear-gradient(90deg,#004466,#00AACC)',int:'linear-gradient(90deg,#330066,#8800CC)',luck:'linear-gradient(90deg,#665500,#CCAA00)'};
+        return `<div class="stat-row"><span class="stat-label">${s.slice(0,3).toUpperCase()}</span><div class="stat-bar"><div class="stat-fill" style="width:${ch.bars[s]}%;background:${gradMap[s]}"></div></div><span style="font-size:8px;color:var(--text-dim);min-width:20px;text-align:right">${ch.bars[s]}</span></div>`;
+      }).join('');
+      card.innerHTML=`
+        <div class="char-portrait-wrap" style="background:radial-gradient(ellipse at 50% 80%,${ch.col}44 0%,transparent 70%),linear-gradient(180deg,rgba(255,255,255,.05) 0%,rgba(0,0,0,.4) 100%)">
+          <canvas class="char-portrait" width="120" height="150" data-cls="${ch.id}"></canvas>
         </div>
-        <div class="char-lore">"${ch.lore}"</div>`;
+        <div class="char-role-badge" style="background:${ch.col}cc">${roleMap[ch.id]||ch.cls.split(' ')[0]}</div>
+        <div class="char-card-body">
+          <div class="char-name">${displayName}<button class="char-name-edit-btn" title="Rename" onclick="event.stopPropagation();NAMEDIT.open('${ch.id}','${displayName}')">✏</button></div>
+          <div class="char-class"><span style="font-size:13px;margin-right:4px">${ch.icon}</span>${ch.cls.toUpperCase()}</div>
+          <div class="char-divider"></div>
+          <div class="char-stats">${statBars}</div>
+          <div class="char-abilities">
+            <div class="char-abilities-label">⚡ Abilities</div>
+            <div class="char-skill-list">${skillDots}</div>
+          </div>
+        </div>`;
       grid.appendChild(card);
     });
   },
+
   confirmChar(){
     AU.sfx('buy');
     const saved=NAMEDIT.load(this.selChar.id);
