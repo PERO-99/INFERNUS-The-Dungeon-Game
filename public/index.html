@@ -5067,22 +5067,26 @@ const SH={
     AU.sfx('ui');
     const item=(SHOP_DATA[this.curTab]||[]).find(i=>i.id===id);if(!item)return;
     if(!PL.equipped)PL.equipped={};
+    const baseStats=PL.charData?.stats||(PL.charData={stats:{atk:PL.atk||10,def:PL.def||5,spd:PL.spd||3,hp:PL.maxHp||500,crit:PL.crit||5}}).stats;
     if(this.curTab==='weapons'){
       PL.equipped.weapon=id;
       const atkB=parseInt((item.stats?.ATK||'+0').replace('+',''))||0;
-      PL.atk=PL.charData.stats.atk+atkB;
+      PL.atk=(baseStats.atk||10)+atkB;
       const spdM=parseFloat(item.stats?.SPD||'1.0');
-      PL.spd=PL.charData.stats.spd*spdM;
+      PL.spd=(baseStats.spd||3)*spdM;
       const critB=parseInt((item.stats?.CRIT||'+0%').replace('+','').replace('%',''))||0;
-      PL.crit=PL.charData.stats.crit+critB;
+      PL.crit=(baseStats.crit||5)+critB;
     }
     if(this.curTab==='armor'){
       PL.equipped.armor=id;
       const defB=parseInt((item.stats?.DEF||'+0').replace('+',''))||0;
-      PL.def=PL.charData.stats.def+defB;
+      PL.def=(baseStats.def||5)+defB;
       const hpB=parseInt((item.stats?.HP||'+0').replace('+',''))||0;
-      PL.maxHp=PL.charData.stats.hp+hpB;PL.hp=Math.min(PL.hp,PL.maxHp);
+      PL.maxHp=(baseStats.hp||500)+hpB;PL.hp=Math.min(PL.hp||PL.maxHp,PL.maxHp);
     }
+    // Close mobile sheet if open
+    const sheet=document.getElementById('shopMobileSheet');
+    if(sheet)sheet.remove();
     GS.notif('Equipped: '+item.name,'gold');this.renderItems();hudUpdate();
     if(typeof AUTH!=='undefined'&&AUTH.token) AUTH.save();
   }
@@ -5150,6 +5154,11 @@ const G={
     AU.sfx('ui');
     // ALWAYS hide all game UI first
     this.hideGameUI();
+    // Always close death/victory overlays when navigating to any screen
+    const ds=document.getElementById('deathScreen');
+    if(ds)ds.classList.remove('show');
+    const lc=document.getElementById('levelComplete');
+    if(lc)lc.classList.remove('show');
     const fade=document.getElementById('fadeOverlay');
     fade.classList.add('show');
     setTimeout(()=>{
@@ -6875,11 +6884,14 @@ const AUTH = {
       maxHp: PL.maxHp,
       atk: PL.atk,
       def: PL.def,
+      spd: PL.spd,
+      crit: PL.crit,
       bestCombo: PL.bestCombo,
       potions: PL.potions,
       inventory: PL.inventory || {},
       equipped: PL.equipped || {},
-      shop: SHOP_DATA,
+      charId: PL.charData?.id || null,
+      storyWave: (G.pendingMode==='story'||GS.mode==='story') ? GS.wave : (gd?.storyWave||0),
       progress: (typeof PROGRESS !== 'undefined' && PROGRESS.data) ? PROGRESS.data : null,
       savedAt: new Date().toISOString()
     };
@@ -6900,11 +6912,39 @@ const AUTH = {
     if(typeof gd.maxHp === 'number') PL.maxHp = gd.maxHp;
     if(typeof gd.atk === 'number') PL.atk = gd.atk;
     if(typeof gd.def === 'number') PL.def = gd.def;
+    if(typeof gd.spd === 'number') PL.spd = gd.spd;
+    if(typeof gd.crit === 'number') PL.crit = gd.crit;
     if(typeof gd.bestCombo === 'number') PL.bestCombo = gd.bestCombo;
     if(gd.potions) PL.potions = gd.potions;
     if(gd.inventory) PL.inventory = gd.inventory;
-    if(gd.equipped) PL.equipped = gd.equipped;
-    if(gd.shop) Object.assign(SHOP_DATA, gd.shop);
+    if(gd.equipped) {
+      PL.equipped = gd.equipped;
+      // Re-apply equipped items stats immediately so gameplay reflects purchases
+      if(gd.equipped.weapon){
+        const wItem=(SHOP_DATA.weapons||[]).find(i=>i.id===gd.equipped.weapon);
+        if(wItem){
+          const atkB=parseInt((wItem.stats?.ATK||'+0').replace('+',''))||0;
+          PL.atk=(gd.atk||PL.atk)+atkB;
+        }
+      }
+      if(gd.equipped.armor){
+        const aItem=(SHOP_DATA.armor||[]).find(i=>i.id===gd.equipped.armor);
+        if(aItem){
+          const defB=parseInt((aItem.stats?.DEF||'+0').replace('+',''))||0;
+          PL.def=(gd.def||PL.def)+defB;
+          const hpB=parseInt((aItem.stats?.HP||'+0').replace('+',''))||0;
+          PL.maxHp=(gd.maxHp||PL.maxHp)+hpB;
+        }
+      }
+    }
+    // Restore story progress - so story mode continues from last saved wave
+    if(typeof gd.storyWave === 'number' && gd.storyWave > 0) {
+      GS._savedStoryWave = gd.storyWave;
+    }
+    if(gd.charId) {
+      const savedChar = CHARS.find(c=>c.id===gd.charId);
+      if(savedChar) G.selChar = savedChar;
+    }
     if(gd.progress && typeof PROGRESS !== 'undefined') {
       Object.assign(PROGRESS.data, gd.progress);
       PROGRESS.save();

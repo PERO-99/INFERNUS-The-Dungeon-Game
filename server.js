@@ -12,7 +12,16 @@ const SECRET_KEY = process.env.JWT_SECRET || process.env.SECRET_KEY || 'infernus
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static files — never cache index.html so mobile gets latest code
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+    }
+  }
+}));
 
 // ── DATABASE SETUP (SUPABASE ONLY) ──
 const SUPABASE_URL = process.env.SUPABASE_URL;
