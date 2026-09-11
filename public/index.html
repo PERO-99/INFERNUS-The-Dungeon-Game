@@ -2169,6 +2169,9 @@ body:not(.game-active) #touchControls{display:none!important;}
 body.is-touch-device .skills-bar{display:none!important;}
 body.is-touch-device .rage-panel{display:none!important;}
 body.is-touch-device .ctrl-hint{display:none!important;}
+/* Nuclear: if touch AND game-active, desktop bars can NEVER show */
+body.is-touch-device.game-active .skills-bar{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;}
+body.is-touch-device.game-active .rage-panel{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;}
 
 #touchControls{
   position:absolute;inset:0;z-index:8;
@@ -4467,7 +4470,7 @@ function doSkill(idx){
   sk.use();hudUpdate();buildSkillSlots();
 }
 function buildSkillSlots(){
-  const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
+  const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0||('ontouchstart' in window);
   // On touch: skills are handled by #tcSkillsRow, do NOT create desktop bar
   if(isTouch){
     const old=document.getElementById('skillsBar');
@@ -4492,6 +4495,8 @@ function buildSkillSlots(){
       <div class="s-cd-overlay" id="scd${i}">${PL.cds[i]>0?Math.ceil(PL.cds[i]/60)+'s':''}</div>`;
     bar.appendChild(slot);
   });
+  // After building, run touch fix in case touch detection fired late
+  runTouchFix();
 }
 function tickSkillCDs(){
   SKILLS.forEach((_,i)=>{
@@ -5202,7 +5207,7 @@ const G={
   },
   // ── showGameUI: restore game UI when returning to game ──────────
   showGameUI(){
-    const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
+    const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0||('ontouchstart' in window);
     document.body.classList.add('game-active');
     if(isTouch)document.body.classList.add('is-touch-device');
     const hud=document.getElementById('hud');
@@ -5219,16 +5224,16 @@ const G={
         rp.style.removeProperty('display');
       }
     } else {
-      // Touch: ensure rage panel is gone
-      const rp=document.getElementById('ragePanel');
-      if(rp)rp.remove();
+      // Touch: nuke ALL desktop-only elements — no hiding, full removal
+      document.querySelectorAll('#ragePanel,.rage-panel').forEach(el=>el.remove());
+      document.querySelectorAll('#skillsBar,.skills-bar').forEach(el=>el.remove());
     }
     // Restore touch controls
     const tc=document.getElementById('touchControls');
     if(tc){tc.style.removeProperty('display');}
     if(typeof TOUCH!=='undefined')TOUCH.showControls(isTouch);
-    // Re-apply mobile cleanup after 100ms to catch any late-rendered desktop UI
-    if(isTouch)setTimeout(runTouchFix,100);
+    // Re-apply mobile cleanup after short delays to catch any late-rendered desktop UI
+    if(isTouch){setTimeout(runTouchFix,100);setTimeout(runTouchFix,500);}
   },
 
   show(id){
@@ -7197,22 +7202,22 @@ if(typeof TOUCH!=='undefined')TOUCH.init();
 
 // ── MOBILE UI CLEANUP ─────────────────────────────────────────────
 // Global function: hides desktop-only game UI on touch devices.
-// Called on load, every 500ms, and after showGameUI() runs.
-// Inline !important styles cannot be overridden by any CSS.
+// Called on load, every 500ms, and after buildSkillSlots() / showGameUI() runs.
 function runTouchFix(){
-  const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
+  const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0||('ontouchstart' in window);
   if(!isTouch)return;
   document.body.classList.add('is-touch-device');
-  function forceHide(sel){
-    const el=sel[0]==='#'?document.getElementById(sel.slice(1)):document.querySelector(sel);
-    if(el)el.style.setProperty('display','none','important');
-  }
-  forceHide('#skillsBar');    // desktop 1-5 skill slots bar
-  forceHide('.rage-panel');   // desktop rage orb/meter
-  forceHide('.ctrl-hint');    // keyboard hints
+  // Remove (not just hide) the desktop skills bar — prevents it re-appearing
+  document.querySelectorAll('#skillsBar,.skills-bar').forEach(el=>el.remove());
+  // Remove the desktop rage panel too
+  document.querySelectorAll('#ragePanel,.rage-panel').forEach(el=>el.remove());
+  // Hide ctrl hints
+  document.querySelectorAll('.ctrl-hint').forEach(el=>el.style.setProperty('display','none','important'));
 }
 runTouchFix();
-setTimeout(runTouchFix,500);
+setTimeout(runTouchFix,300);
+setTimeout(runTouchFix,800);
+setTimeout(runTouchFix,2000);
 
 </script>
 </body>
