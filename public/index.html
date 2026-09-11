@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -252,7 +252,7 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   top:0;left:0;right:0;
   z-index:10;
   text-align:center;
-  padding:22px 20px 18px;
+  padding:clamp(10px,2vh,22px) 20px clamp(8px,1.5vh,18px);
   background:linear-gradient(180deg,rgba(0,0,0,.92) 0%,transparent 100%);
   pointer-events:none;
 }
@@ -482,12 +482,31 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 .mode-panel:nth-child(2){animation-delay:.12s;}
 .mode-panel:nth-child(3){animation-delay:.19s;}
 .mode-panel:nth-child(4){animation-delay:.26s;}
-/* Responsive: stack 2x2 on tablets */
+/* Responsive: 2×2 grid on mobile */
 @media(max-width:700px){
-  .mode-panels{flex-wrap:wrap;}
-  .mode-panel{flex:0 0 50%;min-height:50vh;}
+  /* Push panels below the header (~90px) and above the return button (~60px) */
+  .mode-panels{
+    flex-wrap:wrap;
+    top:90px;         /* clear the header */
+    bottom:60px;      /* clear the return button */
+    inset:unset;
+    left:0;right:0;
+    position:absolute;
+  }
+  .mode-panel{
+    flex:0 0 50%;
+    min-height:0;
+    height:50%;       /* each panel = half the available space */
+  }
   .mode-panel:hover{flex:0 0 50%;}
   .mode-panel-vtag{display:none;}
+  /* Tighten content block so it doesn't overflow short panels */
+  .mode-panel-content{bottom:12px;padding:0 12px;}
+  .mode-panel-num{font-size:52px;bottom:52px;right:6px;}
+  .mode-panel-badge{top:10px;}
+  .mode-panel-icon{font-size:36px;margin-bottom:6px;}
+  .mode-panel-name{font-size:clamp(11px,3.2vw,15px);margin-bottom:4px;}
+  .mode-panel-desc{display:none;}
 }
 
 /* ──────────────────────────────────────────
@@ -733,6 +752,7 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
   gap:16px;
   width:min(1080px,96vw);
   margin-bottom:24px;
+  grid-auto-rows:1fr; /* equalise card heights within each row */
 }
 .char-card{
   background:linear-gradient(145deg,rgba(18,15,30,.96),rgba(10,8,22,.99));
@@ -1527,7 +1547,19 @@ body:not(.game-active) #touchControls{display:none!important;}
   .mbtn.primary{padding:13px 20px;}
   .mode-grid{grid-template-columns:1fr;gap:10px;width:min(340px,92vw);}
   .mode-card{padding:18px 14px;}
-  .char-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+  .char-grid{
+    grid-template-columns:repeat(2,1fr); /* exactly 2 cols — clean 2+2+1 layout */
+    gap:10px;
+    grid-auto-rows:auto; /* let height be natural on mobile — portrait shrinks */
+  }
+  .char-portrait-wrap{height:110px;} /* shorter portrait on small screens */
+  .char-card{padding-bottom:10px;}
+  .char-name{font-size:12px;}
+  .char-class{font-size:8px;margin-bottom:8px;}
+  .stat-row{margin-bottom:2px;}
+  .char-abilities{margin-top:6px;padding-top:6px;}
+  .char-skill-item{font-size:8px;}
+  .char-card-body{padding:0 10px;}
   .shop-tabs{gap:4px;}
   .shop-tab{padding:5px 8px;font-size:8px;}
   .hud-top{padding:5px 8px;}
@@ -1896,9 +1928,9 @@ body.is-touch-device.game-active .rage-panel{display:none!important;visibility:h
   #shopScreen .shop-layout{flex-direction:column!important;}
   #shopScreen .shop-sidebar{width:100%!important;max-height:30vh;overflow-y:auto;}
   #shopScreen .shop-main{width:100%!important;}
-  /* Mode select stack fully on tiny screens */
-  .mode-panels{flex-direction:column!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;}
-  .mode-panel{flex:0 0 28vh!important;min-height:unset!important;max-height:none!important;}
+  /* Mode select: keep 2×2 grid even on tiny screens — single column is too compressed */
+  .mode-panels{flex-direction:row!important;flex-wrap:wrap!important;overflow:hidden!important;top:80px;bottom:56px;}
+  .mode-panel{flex:0 0 50%!important;height:50%!important;min-height:0!important;}
 }
 /* Safe area insets for iPhone notch/home bar */
 @supports(padding: max(0px)){
@@ -6160,187 +6192,6 @@ function drawArcaneTurret(C,s,t,elite){
   C.restore();
 }
 
-(function(){
-  var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
-  if(!isTouchDevice) return;
-  function safeBottom(base){
-    return 'max('+base+'px,calc('+base+'px + env(safe-area-inset-bottom,0px)))';
-  }
-  var css = [
-    '.jy{position:fixed;z-index:9999;display:none;touch-action:none;-webkit-tap-highlight-color:transparent;user-select:none;}',
-    '#jZone{bottom:'+safeBottom(18)+';left:16px;width:130px;height:130px;border-radius:50%;',
-    'background:rgba(0,0,0,.52);border:2px solid rgba(212,175,55,.5);}',
-    '#jKnob{position:absolute;width:48px;height:48px;border-radius:50%;',
-    'background:radial-gradient(circle at 35% 35%,#FFD060,#BE6400);',
-    'border:2px solid rgba(212,175,55,.9);box-shadow:0 0 14px rgba(212,175,55,.55);',
-    'pointer-events:none;left:41px;top:41px;}',
-    '#jCross{position:absolute;inset:0;opacity:.2;pointer-events:none;}',
-    '#jAtk{bottom:'+safeBottom(40)+';right:18px;width:76px;height:76px;border-radius:50%;',
-    'background:radial-gradient(circle,rgba(175,0,0,.94),rgba(55,0,0,.98));',
-    'border:2px solid rgba(220,20,20,.85);box-shadow:0 0 22px rgba(150,0,0,.65);',
-    'align-items:center;justify-content:center;flex-direction:column;',
-    'font-family:Cinzel,serif;color:#FFAAAA;}',
-    '#jAtk .ji{font-size:24px;line-height:1;}',
-    '#jAtk .jt{font-size:8px;letter-spacing:.12em;}',
-    '#jDodge{bottom:'+safeBottom(140)+';right:110px;width:58px;height:58px;border-radius:50%;',
-    'background:rgba(0,40,130,.58);border:2px solid rgba(60,120,255,.65);',
-    'align-items:center;justify-content:center;font-family:Cinzel,serif;',
-    'font-size:9px;letter-spacing:.08em;color:rgba(130,185,255,.95);}',
-    '#jRage{bottom:'+safeBottom(140)+';right:48px;width:52px;height:52px;border-radius:50%;',
-    'background:radial-gradient(circle,rgba(180,60,0,.88),rgba(80,0,0,.96));',
-    'border:2px solid rgba(255,100,0,.75);box-shadow:0 0 14px rgba(255,80,0,.4);',
-    'align-items:center;justify-content:center;flex-direction:column;',
-    'font-family:Cinzel,serif;color:#FFCC88;font-size:9px;letter-spacing:.08em;}',
-    '#jRage .ji{font-size:19px;line-height:1.1;}',
-    '#jPotion{bottom:'+safeBottom(40)+';right:104px;width:54px;height:54px;border-radius:50%;',
-    'background:radial-gradient(circle,rgba(0,140,55,.9),rgba(0,60,20,.96));',
-    'border:2px solid rgba(0,230,80,.7);box-shadow:0 0 14px rgba(0,200,60,.35);',
-    'align-items:center;justify-content:center;flex-direction:column;',
-    'font-family:Cinzel,serif;color:#AAFFCC;font-size:8px;letter-spacing:.1em;}',
-    '#jPotion .ji{font-size:20px;line-height:1.1;}',
-    '#jSk{bottom:'+safeBottom(145)+';right:16px;flex-direction:column;gap:7px;}',
-    '.jb{width:50px;height:50px;border-radius:50%;background:rgba(10,6,2,.9);',
-    'border:1.5px solid rgba(212,175,55,.38);display:flex;align-items:center;justify-content:center;',
-    'font-size:19px;touch-action:none;-webkit-tap-highlight-color:transparent;',
-    'box-shadow:inset 0 1px 0 rgba(255,255,255,.06);}'
-  ].join('');
-  var st = document.createElement('style');
-  st.textContent = css;
-  document.head.appendChild(st);
-  var zone = document.createElement('div');
-  zone.id = 'jZone'; zone.className = 'jy';
-  zone.innerHTML = '<svg id="jCross" viewBox="0 0 130 130"><line x1="65" y1="8" x2="65" y2="122" stroke="#D4AF37" stroke-width="1.2"/><line x1="8" y1="65" x2="122" y2="65" stroke="#D4AF37" stroke-width="1.2"/><circle cx="65" cy="65" r="38" fill="none" stroke="#D4AF37" stroke-width="1"/><circle cx="65" cy="65" r="20" fill="none" stroke="#D4AF37" stroke-width=".5"/></svg><div id="jKnob"></div>';
-  document.body.appendChild(zone);
-  var knob = document.getElementById('jKnob');
-  var R = 40; 
-  var atkDiv = document.createElement('div');
-  atkDiv.id = 'jAtk'; atkDiv.className = 'jy';
-  atkDiv.innerHTML = '<div class="ji">⚔</div><div class="jt">ATK</div>';
-  document.body.appendChild(atkDiv);
-  var dodgeDiv = document.createElement('div');
-  dodgeDiv.id = 'jDodge'; dodgeDiv.className = 'jy';
-  dodgeDiv.textContent = 'DODGE';
-  document.body.appendChild(dodgeDiv);
-  var rageDiv = document.createElement('div');
-  rageDiv.id = 'jRage'; rageDiv.className = 'jy';
-  rageDiv.innerHTML = '<div class="ji">🔥</div>RAGE';
-  document.body.appendChild(rageDiv);
-  var potionDiv = document.createElement('div');
-  potionDiv.id = 'jPotion'; potionDiv.className = 'jy';
-  potionDiv.innerHTML = '<div class="ji">🧪</div>POTION';
-  document.body.appendChild(potionDiv);
-  var skDiv = document.createElement('div');
-  skDiv.id = 'jSk'; skDiv.className = 'jy';
-  [['1','🌊'],['2','🔥'],['3','🌑'],['4','⚡'],['5','💀']].forEach(function(pair){
-    var b = document.createElement('div');
-    b.className = 'jb'; b.dataset.i = pair[0]; b.textContent = pair[1];
-    b.title = 'Skill '+pair[0];
-    b.addEventListener('touchstart', function(e){
-      e.preventDefault();
-      if(typeof doSkill!=='undefined') doSkill(parseInt(pair[0])-1);
-    }, {passive:false});
-    skDiv.appendChild(b);
-  });
-  document.body.appendChild(skDiv);
-  function isOpen(id){ var el = document.getElementById(id); return !!el && (el.classList.contains('show')||el.classList.contains('open')); }
-  function syncVis(){
-    var hud = document.getElementById('hud');
-    var hudActive = !!hud && hud.classList.contains('active');
-    var overlayBlocking = isOpen('levelComplete') || isOpen('deathScreen') || isOpen('pauseMenu');
-    var on = (typeof GS!=='undefined' && GS.running && !GS.paused && hudActive && !overlayBlocking
-              && typeof PL!=='undefined' && PL.alive);
-    zone.style.display    = on ? 'block' : 'none';
-    atkDiv.style.display  = on ? 'flex'  : 'none';
-    dodgeDiv.style.display  = on ? 'flex' : 'none';
-    rageDiv.style.display   = on ? 'flex' : 'none';
-    potionDiv.style.display = on ? 'flex' : 'none';
-    skDiv.style.display   = on ? 'flex'  : 'none';
-    if(!on) resetKnob();
-  }
-  setInterval(syncVis, 100);
-  var active = false, tid = -1, cx0 = 0, cy0 = 0;
-  function resetKnob(){
-    active = false; tid = -1;
-    knob.style.left = '38px'; knob.style.top = '38px';
-    if(typeof IN !== 'undefined'){
-      IN.keys['KeyA'] = false; IN.keys['KeyD'] = false;
-      IN.keys['KeyW'] = false; IN.keys['KeyS'] = false;
-    }
-    if(typeof PL !== 'undefined'){ PL.vx = 0; PL.vy = 0; }
-  }
-  function moveKnob(px, py){
-    var dx = px - cx0, dy = py - cy0;
-    var d = Math.sqrt(dx*dx + dy*dy);
-    if(d > R){ dx = dx/d*R; dy = dy/d*R; }
-    knob.style.left = (38 + dx) + 'px';
-    knob.style.top  = (38 + dy) + 'px';
-    var dead = 0.25;
-    var nx = d > 5 ? dx/R : 0;
-    var ny = d > 5 ? dy/R : 0;
-    if(typeof IN !== 'undefined'){
-      IN.keys['KeyA'] = nx < -dead;
-      IN.keys['KeyD'] = nx >  dead;
-      IN.keys['KeyW'] = ny < -dead;
-      IN.keys['KeyS'] = ny >  dead;
-    }
-  }
-  zone.addEventListener('touchstart', function(e){
-    e.preventDefault();
-    if(typeof GS==='undefined' || !GS.running || GS.paused) return;
-    if(active) return;
-    var t = e.changedTouches[0];
-    tid = t.identifier; active = true;
-    var r = zone.getBoundingClientRect();
-    cx0 = r.left + 65; cy0 = r.top + 65;
-    moveKnob(t.clientX, t.clientY);
-  }, {passive:false});
-  document.addEventListener('touchmove', function(e){
-    if(!active) return;
-    for(var i=0;i<e.changedTouches.length;i++){
-      var t = e.changedTouches[i];
-      if(t.identifier === tid){ moveKnob(t.clientX, t.clientY); return; }
-    }
-  }, {passive:true});
-  function onEnd(e){
-    for(var i=0;i<e.changedTouches.length;i++){
-      if(e.changedTouches[i].identifier === tid){ resetKnob(); return; }
-    }
-  }
-  document.addEventListener('touchend',   onEnd, {passive:true});
-  document.addEventListener('touchcancel', onEnd, {passive:true});
-  var atkTimer = null;
-  atkDiv.addEventListener('touchstart', function(e){
-    e.preventDefault();
-    if(typeof AU!=='undefined') AU.unlock();
-    if(typeof GS==='undefined'||!GS.running||GS.paused) return;
-    if(typeof IN!=='undefined'&&typeof PL!=='undefined'){
-      IN.mWorldX = PL.x + PL.facing*150; IN.mWorldY = PL.y; IN.doAttack();
-    }
-    atkTimer = setInterval(function(){
-      if(typeof GS!=='undefined'&&GS.running&&!GS.paused&&typeof IN!=='undefined'&&typeof PL!=='undefined'){
-        IN.mWorldX = PL.x + PL.facing*150; IN.mWorldY = PL.y; IN.doAttack();
-      }
-    }, 160);
-  }, {passive:false});
-  function clearAtk(){ clearInterval(atkTimer); }
-  atkDiv.addEventListener('touchend',   clearAtk, {passive:true});
-  atkDiv.addEventListener('touchcancel', clearAtk, {passive:true});
-  dodgeDiv.addEventListener('touchstart', function(e){
-    e.preventDefault();
-    if(typeof GS!=='undefined'&&GS.running&&!GS.paused&&typeof IN!=='undefined') IN.doDodge();
-  }, {passive:false});
-  rageDiv.addEventListener('touchstart', function(e){
-    e.preventDefault();
-    if(typeof AU!=='undefined') AU.unlock();
-    if(typeof PL!=='undefined') PL.activateRage();
-  }, {passive:false});
-  potionDiv.addEventListener('touchstart', function(e){
-    e.preventDefault();
-    if(typeof AU!=='undefined') AU.unlock();
-    if(typeof PL!=='undefined') PL.usePotion('hp');
-  }, {passive:false});
-  document.addEventListener('touchstart', function(){ if(typeof AU!=='undefined') AU.unlock(); }, {passive:true});
-})();
 const AUTH = {
   token: (function(){ try { return localStorage.getItem('infernus_token'); }catch(e){ return null; } })(),
   username: (function(){ try { return localStorage.getItem('infernus_user'); }catch(e){ return null; } })(),
