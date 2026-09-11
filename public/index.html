@@ -2287,11 +2287,23 @@ body.is-touch-device .ctrl-hint{display:none!important;}
 }
 @keyframes tcRagePulse{0%,100%{box-shadow:0 0 22px rgba(255,160,0,.5)}50%{box-shadow:0 0 40px rgba(255,200,0,.9)}}
 
-/* POTIONS — moved to LEFT side of screen above joystick */
+/* ── TOUCH CONTROLS LAYOUT (overlap-free) ──────────────────
+   LEFT COLUMN  (x=22px):  Joystick (bottom 28px, 130px tall → top at 158px)
+   LEFT COLUMN  (x=164px): HP potion (bottom 28px), MP potion (bottom 88px)
+                            — tucked right of joystick, same bottom row, no overlap
+   RIGHT COLUMN (right 14–16px, stacking up from bottom):
+                            ATK (bottom 18px, 76px) → top 94px
+                            DODGE (bottom 104px, 60px) → top 164px
+                            RAGE  (bottom 174px, 60px) → top 234px
+   SKILLS ROW: single non-wrapping row, bottom 246px, left side only,
+               right edge stops before right-button zone
+──────────────────────────────────────────────────────────── */
+
+/* POTIONS — right of joystick, stacked vertically */
 .tc-potion-hp{
   width:52px;height:52px;
-  bottom:calc(172px + env(safe-area-inset-bottom,0px));
-  left:22px; /* left side, above joystick */
+  bottom:calc(28px + env(safe-area-inset-bottom,0px)); /* same base as joystick */
+  left:164px;  /* joystick is 22px + 130px wide = 152px, +12px gap */
   right:auto;
   border-radius:14px;
   background:radial-gradient(circle at 40% 35%,rgba(0,180,60,.78),rgba(0,90,25,.96));
@@ -2302,8 +2314,8 @@ body.is-touch-device .ctrl-hint{display:none!important;}
 
 .tc-potion-mp{
   width:52px;height:52px;
-  bottom:calc(234px + env(safe-area-inset-bottom,0px));
-  left:22px; /* left side, above HP */
+  bottom:calc(88px + env(safe-area-inset-bottom,0px)); /* 28 + 52 + 8px gap */
+  left:164px;
   right:auto;
   border-radius:14px;
   background:radial-gradient(circle at 40% 35%,rgba(40,90,240,.78),rgba(10,35,130,.96));
@@ -2330,18 +2342,20 @@ body.is-touch-device .ctrl-hint{display:none!important;}
   position:absolute;
 }
 
-/* SKILLS ROW — sits above potions on the left side */
+/* SKILLS ROW — single row above joystick + potions cluster
+   bottom: joystick top (158px) + 10px gap = 168px
+   right: stay clear of right-side buttons (ATK is 76px wide at right:14px → left edge at ~viewport-90px)
+*/
 .tc-skills-row{
   position:absolute;
-  bottom:calc(298px + env(safe-area-inset-bottom,0px));
+  bottom:calc(168px + env(safe-area-inset-bottom,0px));
   left:6px;
-  right:90px; /* don't intrude into right-button zone */
-  display:flex;flex-direction:row;gap:5px;
+  right:96px; /* clear of right-column buttons */
+  display:flex;flex-direction:row;gap:6px;
   justify-content:flex-start;
   pointer-events:none;
   padding:0 2px;
-  flex-wrap:wrap; /* allow wrapping into 2 rows if needed */
-  max-height:100px;
+  flex-wrap:nowrap; /* NEVER wrap — single row only */
   overflow:hidden;
 }
 .tc-skill-btn{
@@ -2385,22 +2399,27 @@ body.is-touch-device .ctrl-hint{display:none!important;}
 
 /* ── TOUCH CONTROLS: Compact layout for very small screens ── */
 @media(pointer:coarse) and (max-height:680px){
-  /* Compress the right-side stack for shorter phones */
-  .tc-atk{width:68px;height:68px;bottom:calc(12px + env(safe-area-inset-bottom,0px));}
-  .tc-dodge{width:52px;height:52px;bottom:calc(92px + env(safe-area-inset-bottom,0px));}
-  .tc-rage{width:52px;height:52px;bottom:calc(156px + env(safe-area-inset-bottom,0px));}
-  .tc-potion-hp{width:46px;height:46px;bottom:calc(156px + env(safe-area-inset-bottom,0px));left:20px;}
-  .tc-potion-mp{width:46px;height:46px;bottom:calc(212px + env(safe-area-inset-bottom,0px));left:20px;}
-  .tc-skills-row{bottom:calc(266px + env(safe-area-inset-bottom,0px));}
-  .tc-skill-btn{width:38px;height:38px;}
-  .tc-skill-btn .sk-icon{font-size:16px;}
+  /* Shrink all buttons slightly on short phones */
+  .tc-atk{width:64px;height:64px;bottom:calc(10px + env(safe-area-inset-bottom,0px));}
+  .tc-dodge{width:52px;height:52px;bottom:calc(84px + env(safe-area-inset-bottom,0px));}
+  .tc-rage{width:50px;height:50px;bottom:calc(146px + env(safe-area-inset-bottom,0px));}
+  /* Joystick stays put, shrink slightly */
+  .tc-joy-base{width:110px;height:110px;bottom:calc(20px + env(safe-area-inset-bottom,0px));}
+  /* Potions: right of joystick (110px + 22px + 10px gap = 142px) */
+  .tc-potion-hp{width:46px;height:46px;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:144px;}
+  .tc-potion-mp{width:46px;height:46px;bottom:calc(74px + env(safe-area-inset-bottom,0px));left:144px;}
+  /* Skills row: above joystick top (20+110=130px) + 8px gap = 138px */
+  .tc-skills-row{bottom:calc(138px + env(safe-area-inset-bottom,0px));right:92px;}
+  .tc-skill-btn{width:36px;height:36px;}
+  .tc-skill-btn .sk-icon{font-size:15px;}
 }
 @media(pointer:coarse) and (max-width:380px){
-  /* Narrow phones: skills row and potions adjusted */
-  .tc-skills-row{left:4px;gap:4px;right:85px;}
-  .tc-skill-btn{width:36px;height:36px;}
-  .tc-potion-hp{left:18px;}
-  .tc-potion-mp{left:18px;}
+  /* Narrow phones: squeeze left side inward slightly */
+  .tc-skills-row{left:2px;gap:4px;right:88px;}
+  .tc-skill-btn{width:34px;height:34px;}
+  .tc-skill-btn .sk-icon{font-size:14px;}
+  .tc-potion-hp{left:154px;}
+  .tc-potion-mp{left:154px;}
 }
 
 /* ── MOBILE RESPONSIVE OVERRIDES ──────────────────────────── */
@@ -4988,35 +5007,79 @@ const SH={
   },
   renderItems(){
     const grid=document.getElementById('shopGrid');grid.innerHTML='';
+    const isPotion=this.isConsumable();
     (SHOP_DATA[this.curTab]||[]).forEach(item=>{
-      const owned=this.isOwned(item);
-      const equip=this.isEquipped(item);
+      const owned=!isPotion&&this.isOwned(item);
+      const equip=!isPotion&&this.isEquipped(item);
+      const stock=isPotion?this.getPotionStock(item.id):0;
       const card=document.createElement('div');
-      card.className='shop-item'+(owned?' owned':'')+(equip?' equipped':'');
+      // Potions: show "stocked" style if you have any; never "owned" (can always buy more)
+      card.className='shop-item'+(owned?' owned':'')+(equip?' equipped':'')+(isPotion&&stock>0?' owned':'');
       card.onclick=()=>this.selectItem(item);
+      let badgeLine;
+      if(isPotion){
+        badgeLine=stock>0
+          ?`<div style="font-size:9px;color:var(--hp-green);margin-top:2px">×${stock} in bag</div>`
+          :`<div class="item-cost"><span class="gold-ico">${gicon('coin')}</span>${item.cost}</div>`;
+      } else {
+        badgeLine=owned
+          ?`<div style="font-size:9px;color:var(--hp-green);margin-top:2px">${equip?'★ EQUIPPED':'✓ OWNED'}</div>`
+          :`<div class="item-cost"><span class="gold-ico">${gicon('coin')}</span>${item.cost}</div>`;
+      }
       card.innerHTML=`<div class="item-rarity-dot" style="background:${item.rc}"></div>
         <span class="item-icon"${item.liq?` style="--liq:${item.liq}"`:''}>${gicon(item.icon)}</span>
         <div class="item-name">${item.name}</div>
-        ${owned?`<div style="font-size:9px;color:var(--hp-green);margin-top:2px">${equip?'★ EQUIPPED':'✓ OWNED'}</div>`:
-        `<div class="item-cost"><span class="gold-ico">${gicon('coin')}</span>${item.cost}</div>`}`;
+        ${badgeLine}`;
       grid.appendChild(card);
     });
   },
   isOwned(item){return item.owned||((PL.inventory||{})[this.curTab]||[]).includes(item.id);},
   isEquipped(item){return PL.equipped&&(PL.equipped.weapon===item.id||PL.equipped.armor===item.id);},
+  isConsumable(){return this.curTab==='potions';},
+  getPotionStock(id){
+    if(!PL.potions)return 0;
+    if(id==='p1')return PL.potions.hp||0;
+    if(id==='p2')return PL.potions.mp||0;
+    if(id==='p3')return PL.potions.power||0;
+    if(id==='p4')return PL.potions.grand||0;
+    if(id==='p5')return PL.potions.blood||0;
+    return 0;
+  },
   selectItem(item){
     AU.sfx('ui');this.sel=item;
-    const owned=this.isOwned(item);const canBuy=PL.gold>=item.cost&&!owned&&item.cost>0;
+    const isPotion=this.isConsumable();
+    const stock=isPotion?this.getPotionStock(item.id):0;
+    const owned=!isPotion&&this.isOwned(item);
+    // Potions: always buyable if you have gold. Other items: only if not already owned.
+    const canBuy=isPotion?(PL.gold>=item.cost&&item.cost>0):(PL.gold>=item.cost&&!owned&&item.cost>0);
     const sh=Object.entries(item.stats||{}).map(([k,v])=>`<div class="detail-stat"><span>${k}</span><span>${v}</span></div>`).join('');
+
+    // Stock badge for potions
+    const stockBadge=isPotion?`<div style="font-size:10px;color:var(--hp-green);margin-bottom:6px;letter-spacing:.1em">IN STOCK: <b style="color:#fff">${stock}</b></div>`:'';
+    // Owned badge for non-consumable items
+    const ownedBadge=(!isPotion&&owned)?`<div style="font-size:9px;color:var(--hp-green);margin-top:2px">✓ OWNED</div>`:'';
+    // Buy button label
+    let buyLabel;
+    if(isPotion){
+      buyLabel=`<span class="buy-ico">${gicon('coin')}</span>BUY — ${item.cost} Gold`;
+    } else if(owned){
+      buyLabel='\u2713 OWNED';
+    } else if(item.cost===0){
+      buyLabel='\u2713 FREE';
+    } else {
+      buyLabel=`<span class="buy-ico">${gicon('coin')}</span>BUY \u2014 ${item.cost} Gold`;
+    }
+
     const detailHTML=`
       <span class="detail-icon"${item.liq?` style="--liq:${item.liq}"`:''}>${gicon(item.icon)}</span>
       <div class="detail-name">${item.name}</div>
       <div style="font-size:9px;color:${item.rc};letter-spacing:.2em;margin-bottom:7px;text-transform:uppercase">${item.rarity}</div>
+      ${stockBadge}
       <div class="detail-desc">${item.desc}</div>
       <div class="detail-stats">${sh}</div>
       <button class="buy-btn" ${!canBuy?'disabled':''} onclick="SH.buy('${item.id}')">
-        ${owned?'\u2713 OWNED':item.cost===0?'\u2713 FREE':(`<span class="buy-ico">${gicon('coin')}</span>BUY \u2014 ${item.cost} Gold`)}</button>
-      ${owned?`<button class="equip-btn" onclick="SH.equip('${item.id}')"><span class="equip-ico">${gicon('check')}</span>EQUIP NOW</button>`:''}`;
+        ${buyLabel}</button>
+      ${(!isPotion&&owned)?`<button class="equip-btn" onclick="SH.equip('${item.id}')"><span class="equip-ico">${gicon('check')}</span>EQUIP NOW</button>`:''}`;
 
     const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
     if(isTouch){
@@ -5046,6 +5109,24 @@ const SH={
     const item=(SHOP_DATA[this.curTab]||[]).find(i=>i.id===id);if(!item)return;
     if(item.cost>0&&PL.gold<item.cost){GS.notif('Not enough gold!');return;}
     if(item.cost>0)PL.gold-=item.cost;
+
+    // ── POTIONS: stackable consumables — add to potion count, NOT inventory ──
+    if(this.curTab==='potions'){
+      if(!PL.potions)PL.potions={hp:0,mp:0};
+      if(id==='p1'){PL.potions.hp++;GS.notif('🧪 +1 Health Vial (×'+PL.potions.hp+')','gold');}
+      else if(id==='p2'){PL.potions.mp++;GS.notif('🫙 +1 Mana Flask (×'+PL.potions.mp+')','gold');}
+      else if(id==='p3'){if(!PL.potions.power)PL.potions.power=0;PL.potions.power++;GS.notif('⚗️ +1 Power Tonic (×'+PL.potions.power+')','gold');}
+      else if(id==='p4'){if(!PL.potions.grand)PL.potions.grand=0;PL.potions.grand++;GS.notif('✨ +1 Grand Elixir (×'+PL.potions.grand+')','gold');}
+      else if(id==='p5'){if(!PL.potions.blood)PL.potions.blood=0;PL.potions.blood++;GS.notif('🩸 +1 Blood Draught (×'+PL.potions.blood+')','gold');}
+      document.getElementById('goldDisp').textContent=PL.gold;
+      AU.sfx('buy');
+      let sheet=document.getElementById('shopMobileSheet');if(sheet)sheet.remove();
+      this.renderItems();this.selectItem(item);
+      if(typeof AUTH!=='undefined'&&AUTH.token) AUTH.save();
+      hudUpdate();
+      return;
+    }
+
     if(!PL.inventory)PL.inventory={};
     if(!PL.inventory[this.curTab])PL.inventory[this.curTab]=[];
     PL.inventory[this.curTab].push(id);
