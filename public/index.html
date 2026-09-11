@@ -3037,17 +3037,14 @@ body.is-touch-device .ctrl-hint{display:none!important;}
       <div class="combo-disp" id="comboDisp">×1 COMBO</div>
     </div>
   </div>
-  <div class="rage-panel" id="ragePanel" style="display:none">
-    <div class="rage-label">⚡ RAGE</div>
-    <div class="rage-orb" id="rageOrb" onclick="PL.activateRage()" title="Press R for Rage">🔥<span class="rage-pct-text" id="ragePctText">0%</span></div>
-  </div>
+  <!-- rage-panel: desktop only, inserted by JS in showGameUI() -->
   <div class="minimap">
     <div class="minimap-lbl">MAP</div>
     <canvas id="mmCanvas" width="105" height="105"></canvas>
   </div>
   <div class="kill-feed" id="killFeed" style="top:228px;right:14px;"></div>
   <div class="notif-area" id="notifArea"></div>
-  <div class="skills-bar" id="skillsBar" style="display:none"></div>
+  <!-- skills-bar: desktop only, inserted by buildSkillSlots() when not touch -->
   <div class="xp-bar-wrap"><div class="xp-fill" id="xpBar" style="width:0%"></div></div>
   <div class="ctrl-hint">
     <div class="ctrl-kb">
@@ -4452,10 +4449,19 @@ function doSkill(idx){
 }
 function buildSkillSlots(){
   const isTouch=window.matchMedia('(pointer:coarse)').matches||navigator.maxTouchPoints>0;
-  const bar=document.getElementById('skillsBar');
-  if(!bar)return;
-  // On touch devices, touch controls handle skills — skip the desktop bar entirely
-  if(isTouch){bar.style.setProperty('display','none','important');return;}
+  // On touch: skills are handled by #tcSkillsRow, do NOT create desktop bar
+  if(isTouch){
+    const old=document.getElementById('skillsBar');
+    if(old)old.remove(); // remove if somehow exists
+    return;
+  }
+  // Desktop: create/reuse the skills bar element
+  let bar=document.getElementById('skillsBar');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.className='skills-bar';bar.id='skillsBar';
+    document.getElementById('hud').appendChild(bar);
+  }
   bar.innerHTML='';
   SKILLS.forEach((sk,i)=>{
     const slot=document.createElement('div');
@@ -4831,9 +4837,12 @@ function hudUpdate(){
 function updateRage(){
   const pct=PL.rage/PL.maxRage*100;
   const orb=document.getElementById('rageOrb');
-  orb.style.setProperty('--rage-pct',pct+'%');
-  orb.classList.toggle('full',PL.rage>=PL.maxRage);
-  document.getElementById('ragePctText').textContent=Math.floor(pct)+'%';
+  if(orb){
+    orb.style.setProperty('--rage-pct',pct+'%');
+    orb.classList.toggle('full',PL.rage>=PL.maxRage);
+  }
+  const rt=document.getElementById('ragePctText');
+  if(rt)rt.textContent=Math.floor(pct)+'%';
 }
 function spawnDmgPop(x,y,text,type='normal'){
   // On mobile, limit max simultaneous damage pop DOM elements to avoid layout thrash
@@ -5113,23 +5122,27 @@ const G={
     if(isTouch)document.body.classList.add('is-touch-device');
     const hud=document.getElementById('hud');
     if(hud){hud.style.display='';hud.classList.add('active');}
-    // Restore touch controls (remove our forced hide)
+    if(!isTouch){
+      // Desktop only: create rage panel if it doesn't exist
+      if(!document.getElementById('ragePanel')){
+        const rp=document.createElement('div');
+        rp.className='rage-panel';rp.id='ragePanel';
+        rp.innerHTML='<div class="rage-label">⚡ RAGE</div><div class="rage-orb" id="rageOrb" onclick="PL.activateRage()" title="Press R for Rage">🔥<span class="rage-pct-text" id="ragePctText">0%</span></div>';
+        document.getElementById('hud').appendChild(rp);
+      } else {
+        const rp=document.getElementById('ragePanel');
+        rp.style.removeProperty('display');
+      }
+    } else {
+      // Touch: ensure rage panel is gone
+      const rp=document.getElementById('ragePanel');
+      if(rp)rp.remove();
+    }
+    // Restore touch controls
     const tc=document.getElementById('touchControls');
     if(tc){tc.style.removeProperty('display');}
-    // Desktop skills bar: only restore on non-touch devices
-    const sb=document.getElementById('skillsBar');
-    if(sb){
-      if(isTouch){sb.style.setProperty('display','none','important');}
-      else{sb.style.removeProperty('display');}
-    }
-    // Desktop rage panel: only restore on non-touch devices
-    const rp=document.getElementById('ragePanel')||document.querySelector('.rage-panel');
-    if(rp){
-      if(isTouch){rp.style.setProperty('display','none','important');}
-      else{rp.style.removeProperty('display');}
-    }
     if(typeof TOUCH!=='undefined')TOUCH.showControls(isTouch);
-    // Re-apply mobile cleanup 100ms after game UI shows (catches buildSkillSlots updates)
+    // Re-apply mobile cleanup after 100ms to catch any late-rendered desktop UI
     if(isTouch)setTimeout(runTouchFix,100);
   },
 
