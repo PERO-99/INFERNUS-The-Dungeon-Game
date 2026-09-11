@@ -4689,7 +4689,12 @@ const G={
       if(id==='titleScreen')AU.playTheme('menu');
       if(id==='settingsScreen')AU.sfx('ui');
       if(id==='progressScreen')PROGRESS.render();
-      if(id==='modeScreen'&&typeof ModeFX!=='undefined')ModeFX.reinit();
+      if(id==='modeScreen'&&typeof ModeFX!=='undefined'){
+        ModeFX.reinit();
+        // Restart bg animation loop (it stops when screen is hidden)
+        const mc=document.getElementById('modeCanvas');
+        if(mc&&mc._startBg)mc._startBg();
+      }
       paintIcons();
     },380);
   },
@@ -4762,6 +4767,8 @@ const G={
     PL.atk=Math.floor(PL.charData.stats.atk);
     PL.reset();GS.enemies=[];GS.projs=[];GS.particles=[];
     GS.wave=1;GS.waveComplete=false;
+    // Reset input state so stale touch/key presses don't cause auto-movement
+    IN.keys={};IN.touchJoy={dx:0,dy:0,active:false};IN.touchAimDir={x:1,y:0};IN.touchAtkHeld=false;IN.mDown=false;
     document.getElementById('hudName').textContent=PL.name;
     document.getElementById('hudClass').textContent=PL.charData.cls.toUpperCase();
     buildSkillSlots();hudUpdate();updateRage();
@@ -4831,6 +4838,8 @@ const G={
     GS.running=false;GS.paused=false;
     GS._fromPause=false;GS._fromVictory=false;GS._fromDeath=false;
     GS.enemies=[];GS.projs=[];GS.particles=[];
+    // Clear all input state so nothing carries over to menus
+    IN.keys={};IN.touchJoy={dx:0,dy:0,active:false};IN.touchAimDir={x:1,y:0};IN.touchAtkHeld=false;IN.mDown=false;
     document.getElementById('deathScreen').classList.remove('show');
     document.getElementById('levelComplete').classList.remove('show');
     document.getElementById('bossBar').classList.remove('vis');
@@ -5446,7 +5455,7 @@ const ModeFX=(function(){
   function step(){
     masterRAF=requestAnimationFrame(step);
     const scr=document.getElementById('modeScreen');
-    if(!scr||scr.classList.contains('hidden'))return;
+    if(!scr||scr.classList.contains('hidden'))return; // don't draw when hidden
     cardAnimators.forEach(ca=>{
       ca.t+=16;
       const {ctx,W,H,mode,state,t}=ca;
@@ -5457,29 +5466,38 @@ const ModeFX=(function(){
     });
   }
 
-  
   function initBg(){
     const cv=document.getElementById('modeCanvas');
     if(!cv)return;
     let W=cv.width=window.innerWidth,H=cv.height=window.innerHeight;
     const ctx=cv.getContext('2d');
     let t=0;
+    let bgRaf=null;
     function drawBg(){
       const scr=document.getElementById('modeScreen');
-      if(!scr||scr.classList.contains('hidden')){t+=16;requestAnimationFrame(drawBg);return;}
+      if(!scr||scr.classList.contains('hidden')){
+        // Screen hidden — stop the loop, don't waste CPU
+        bgRaf=null;
+        return;
+      }
       t+=16;
       ctx.clearRect(0,0,W,H);
       ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
-      
       const pulse=.5+.5*Math.sin(t*.0007);
       const bg=ctx.createRadialGradient(W*.5,H*.5,0,W*.5,H*.5,W*.65);
       bg.addColorStop(0,`rgba(${30+pulse*15},${3},${6+pulse*4},.6)`);
       bg.addColorStop(.7,'rgba(0,0,0,0)');
       ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-      requestAnimationFrame(drawBg);
+      bgRaf=requestAnimationFrame(drawBg);
+    }
+    // Start bg loop only when mode screen becomes visible
+    function startBg(){
+      if(!bgRaf)bgRaf=requestAnimationFrame(drawBg);
     }
     window.addEventListener('resize',()=>{W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;});
-    requestAnimationFrame(drawBg);
+    // Expose startBg so G.show() can call it
+    cv._startBg=startBg;
+    startBg();
   }
 
   function init(){
