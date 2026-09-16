@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: infernus-the-dungeon-game
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true   # Render auto-generates a secure random value
+      - key: SUPABASE_URL
+        sync: false           # must be set manually in Render dashboard
+      - key: SUPABASE_KEY
+        sync: false           # must be set manually in Render dashboard
