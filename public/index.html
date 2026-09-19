@@ -484,23 +484,25 @@ body{font-family:'Cinzel',serif;color:var(--text);user-select:none;cursor:crossh
 .mode-panel:nth-child(4){animation-delay:.26s;}
 /* Responsive: 2×2 grid on mobile */
 @media(max-width:700px){
-  /* Push panels below the header (~90px) and above the return button (~60px) */
+  /* Push panels below the header and above the return button */
   .mode-panels{
     flex-wrap:wrap;
-    top:90px;         /* clear the header */
-    bottom:60px;      /* clear the return button */
-    inset:unset;
-    left:0;right:0;
     position:absolute;
+    top:90px;
+    bottom:60px;
+    left:0;
+    right:0;
+    /* explicit height so children can resolve percentage heights */
+    height:calc(100vh - 150px);
   }
   .mode-panel{
     flex:0 0 50%;
+    /* use calc so height is always explicit, not relative to an ambiguous parent */
+    height:calc((100vh - 150px) / 2);
     min-height:0;
-    height:50%;       /* each panel = half the available space */
   }
   .mode-panel:hover{flex:0 0 50%;}
   .mode-panel-vtag{display:none;}
-  /* Tighten content block so it doesn't overflow short panels */
   .mode-panel-content{bottom:12px;padding:0 12px;}
   .mode-panel-num{font-size:52px;bottom:52px;right:6px;}
   .mode-panel-badge{top:10px;}
@@ -1929,8 +1931,8 @@ body.is-touch-device.game-active .rage-panel{display:none!important;visibility:h
   #shopScreen .shop-sidebar{width:100%!important;max-height:30vh;overflow-y:auto;}
   #shopScreen .shop-main{width:100%!important;}
   /* Mode select: keep 2×2 grid even on tiny screens — single column is too compressed */
-  .mode-panels{flex-direction:row!important;flex-wrap:wrap!important;overflow:hidden!important;top:80px;bottom:56px;}
-  .mode-panel{flex:0 0 50%!important;height:50%!important;min-height:0!important;}
+  .mode-panels{flex-direction:row!important;flex-wrap:wrap!important;overflow:hidden!important;position:absolute!important;top:80px;bottom:56px;left:0;right:0;height:calc(100vh - 136px)!important;}
+  .mode-panel{flex:0 0 50%!important;height:calc((100vh - 136px) / 2)!important;min-height:0!important;}
 }
 /* Safe area insets for iPhone notch/home bar */
 @supports(padding: max(0px)){
