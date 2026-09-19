@@ -8,9 +8,12 @@
 
 [![Node.js](https://img.shields.io/badge/Node.js-22+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Express](https://img.shields.io/badge/Express-5.x-000000?logo=express&logoColor=white)](https://expressjs.com)
-[![SQLite](https://img.shields.io/badge/SQLite-3-003B57?logo=sqlite&logoColor=white)](https://sqlite.org)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Render](https://img.shields.io/badge/Deployed-Render-46E3B7?logo=render&logoColor=white)](https://infernus-the-dungeon-game.onrender.com)
 [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Mobile-blueviolet)](#)
 [![License](https://img.shields.io/badge/License-MIT-gold)](#)
+
+### 🌐 [**Play Live → infernus-the-dungeon-game.onrender.com**](https://infernus-the-dungeon-game.onrender.com)
 
 </div>
 
@@ -145,7 +148,7 @@ INFERNUS The Dungeon Game/
 ├── screenshots/            # Game screenshots
 │
 ├── server.js               # Express backend (auth, save/load API)
-├── database.sqlite         # Player accounts & cloud saves (auto-created)
+├── render.yaml             # Render deployment config
 ├── package.json
 └── README.md
 ```
@@ -159,7 +162,7 @@ INFERNUS The Dungeon Game/
 | **Game Engine** | Vanilla JavaScript (Canvas 2D API) |
 | **UI / Styling** | HTML5 + Vanilla CSS (no frameworks) |
 | **Backend** | Node.js + Express 5 |
-| **Database** | **Supabase (PostgreSQL Cloud)** / SQLite (fallback) |
+| **Database** | **Supabase (PostgreSQL Cloud)** |
 | **Auth** | JWT (JSON Web Tokens) + bcrypt |
 | **Audio** | Web Audio API (generative music + SFX) |
 | **Rendering** | HTML5 Canvas — 60 FPS game loop |
