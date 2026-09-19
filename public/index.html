@@ -1182,65 +1182,6 @@ body:not(.game-active) #touchControls{display:none!important;}
   box-shadow:0 0 20px rgba(212,175,55,.2);}
 @keyframes ni{from{opacity:0;transform:translateY(-18px) scale(.9)}to{opacity:1;transform:none}}
 @keyframes no{to{opacity:0;transform:translateY(-10px)}}
-/* ── BOSS / LOW-HP BUY-POTION ALERT ── */
-#bossAlert{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.88);
-  z-index:20;pointer-events:all;
-  background:linear-gradient(160deg,rgba(6,2,12,.97),rgba(12,4,18,.99));
-  border:1px solid rgba(212,175,55,.55);
-  border-top:2px solid var(--gold-bright);
-  padding:20px 26px 18px;
-  min-width:min(320px,88vw);max-width:min(400px,92vw);
-  text-align:center;
-  clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px);
-  box-shadow:0 0 60px rgba(139,0,0,.55),0 0 120px rgba(212,175,55,.1);
-  animation:bossAlertIn .38s cubic-bezier(0.22,1,0.36,1) forwards;
-}
-#bossAlert.low-hp-variant{border-top-color:var(--blood-bright);box-shadow:0 0 60px rgba(220,0,0,.7),0 0 120px rgba(255,60,0,.15);}
-@keyframes bossAlertIn{from{opacity:0;transform:translate(-50%,-50%) scale(.78)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
-@keyframes bossAlertOut{to{opacity:0;transform:translate(-50%,-50%) scale(.86)}}
-#bossAlert.closing{animation:bossAlertOut .22s ease forwards;}
-.ba-icon{font-size:clamp(28px,6vw,40px);margin-bottom:6px;display:block;
-  animation:baPulse 1.4s ease-in-out infinite;filter:drop-shadow(0 0 14px rgba(255,100,0,.8));}
-.ba-icon.low-hp{filter:drop-shadow(0 0 14px rgba(220,0,0,.9));animation:baPulse .8s ease-in-out infinite;}
-@keyframes baPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
-.ba-title{font-family:'Cinzel Decorative',serif;font-size:clamp(12px,2.8vw,16px);font-weight:700;
-  letter-spacing:.12em;color:var(--gold-bright);margin-bottom:4px;
-  text-shadow:0 0 20px rgba(255,200,0,.6);}
-.ba-title.low-hp{color:var(--blood-bright);text-shadow:0 0 20px rgba(220,0,0,.7);}
-.ba-sub{font-family:'Rajdhani',sans-serif;font-size:clamp(10px,2.2vw,13px);
-  color:rgba(210,190,160,.8);letter-spacing:.04em;line-height:1.6;margin-bottom:14px;}
-.ba-stock{font-family:'Cinzel',serif;font-size:11px;color:var(--text-dim);
-  margin-bottom:14px;letter-spacing:.08em;}
-.ba-stock span{color:var(--hp-green);font-weight:700;}
-.ba-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.45) 50%,transparent);margin-bottom:14px;}
-.ba-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-.ba-buy-btn{
-  font-family:'Cinzel',serif;font-size:clamp(10px,2vw,12px);letter-spacing:.14em;
-  color:#fff;padding:10px clamp(14px,3vw,22px);cursor:pointer;
-  background:linear-gradient(135deg,rgba(0,120,0,.9),rgba(0,80,0,.95));
-  border:1px solid #44CC44;border-bottom:2px solid #22AA22;
-  clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
-  transition:all .2s;
-}
-.ba-buy-btn:hover{background:linear-gradient(135deg,rgba(0,170,0,.95),rgba(0,120,0,.98));box-shadow:0 0 18px rgba(0,200,0,.4);}
-.ba-buy-btn:active{transform:scale(.96);}
-.ba-buy-btn.cant-afford{opacity:.45;cursor:not-allowed;border-color:#666;}
-.ba-dismiss-btn{
-  font-family:'Cinzel',serif;font-size:clamp(9px,1.8vw,11px);letter-spacing:.12em;
-  color:rgba(200,180,160,.6);padding:10px clamp(10px,2.5vw,18px);cursor:pointer;
-  background:transparent;border:1px solid rgba(255,255,255,.15);
-  clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
-  transition:all .2s;
-}
-.ba-dismiss-btn:hover{border-color:rgba(255,255,255,.35);color:rgba(220,200,180,.8);}
-.ba-gold-row{font-family:'Cinzel',serif;font-size:10px;color:var(--text-dim);margin-top:10px;letter-spacing:.06em;}
-.ba-gold-row span{color:var(--gold);}
-@media(max-width:480px){
-  #bossAlert{padding:16px 16px 14px;top:45%;}
-  .ba-title{font-size:13px;}
-  .ba-sub{font-size:11px;}
-}
 .ctrl-hint{position:absolute;bottom:90px;right:14px;background:rgba(0,0,0,.75);border:1px solid var(--stone);
   padding:9px 13px;font-size:9px;color:var(--text-dim);line-height:1.9;letter-spacing:.09em;pointer-events:none;backdrop-filter:blur(4px);}
 .ctrl-hint span{color:var(--gold);}
@@ -3666,7 +3607,6 @@ const GS={
   startWave(){
     this.waveComplete=false;this.enemies=[];this.projs=[];
     this.bossWave=this.wave%5===0;
-    _bossLowHpCooldown = 0; // reset so low-HP alert can fire fresh this wave
     // Advance biome every 3 waves (biomes 0-4 cycle)
     this.biome=Math.floor((this.wave-1)/3)%BIOMES.length;
     document.getElementById('waveBadge').textContent=`WAVE ${this.wave}`;
@@ -3681,9 +3621,7 @@ const GS={
       document.getElementById('bossFill').style.width='100%';
       AU.sfx('boss');AU.playTheme('boss');
       this.notif(`☠ BOSS APPEARS: ${boss.name}`,'gold');
-      // Show pre-boss warning with buy-potion button after a short delay
-      // so the wave-start notif appears first and the alert feels intentional
-      setTimeout(()=>showBossAlert('pre-boss', boss.name), 900);
+      setTimeout(()=>this.notif('🧪 Stock up on potions before fighting!','red'), 3400);
     }else{
       AU.playTheme('combat');this.spawnWave(this.wave);
     }
@@ -3695,7 +3633,6 @@ const GS={
   waveClear(){
     if(this.waveComplete)return;
     this.waveComplete=true;AU.playTheme('victory');
-    dismissBossAlert();
     const gReward=60+this.wave*22;const xpReward=35+this.wave*16;
     PL.gainGold(gReward);PL.gainXP(xpReward);
     PL.hp=Math.min(PL.maxHp,PL.hp+Math.floor(PL.maxHp*.25));
@@ -3713,7 +3650,6 @@ const GS={
   },
   endGame(){
     this.running=false;
-    dismissBossAlert();
     document.getElementById('dKills').textContent=PL.kills;
     document.getElementById('dWave').textContent=PL.wave;
     document.getElementById('dScore').textContent=PL.score.toLocaleString();
@@ -4424,96 +4360,6 @@ let _enemyUpdateFrame=0;
 // Mobile: throttle game loop to ~30fps to reduce CPU/GPU pressure
 const _MOBILE_FRAME_MS = IS_MOBILE ? 33 : 0; // 33ms = 30fps cap
 let _lastFrameTime = 0;
-
-// ── BOSS ALERT SYSTEM ────────────────────────────────────────────────────────
-// Cooldown so the low-HP alert doesn't fire every frame (in frames)
-let _bossLowHpCooldown = 0;
-
-function dismissBossAlert(){
-  const el = document.getElementById('bossAlert');
-  if(!el) return;
-  el.classList.add('closing');
-  setTimeout(()=>{ if(el.parentNode) el.remove(); }, 240);
-}
-
-function showBossAlert(variant, bossName){
-  // Remove any existing alert first
-  dismissBossAlert();
-  const isLowHp = variant === 'low-hp';
-  const potionCost = 50;
-  const canAfford = PL.gold >= potionCost;
-
-  const icon = isLowHp ? '💀' : '☠';
-  const title = isLowHp ? 'CRITICAL — LOW HP!' : 'BOSS INCOMING!';
-  const sub = isLowHp
-    ? 'You are about to die! Buy a Health Vial now<br>and use it with <b style="color:var(--gold)">Q</b> (or the potion button).'
-    : `<b style="color:var(--gold-bright)">${bossName||'The Boss'}</b> approaches.<br>Stock up on Health Vials — you\'ll need them.`;
-
-  const stockNow = (PL.potions && PL.potions.hp) || 0;
-
-  const el = document.createElement('div');
-  el.id = 'bossAlert';
-  if(isLowHp) el.classList.add('low-hp-variant');
-
-  el.innerHTML = `
-    <span class="ba-icon${isLowHp?' low-hp':''}">${icon}</span>
-    <div class="ba-title${isLowHp?' low-hp':''}">${title}</div>
-    <div class="ba-sub">${sub}</div>
-    <div class="ba-divider"></div>
-    <div class="ba-stock">Health Vials in bag: <span>${stockNow}</span> &nbsp;|&nbsp; Cost: <span style="color:var(--gold)">${potionCost}g</span></div>
-    <div class="ba-btns">
-      <button class="ba-buy-btn${canAfford?'':' cant-afford'}" id="baBuyBtn">
-        🧪 Buy Health Vial (${potionCost}g)
-      </button>
-      <button class="ba-dismiss-btn" id="baDismissBtn">Dismiss</button>
-    </div>
-    <div class="ba-gold-row">Your gold: <span id="baGoldVal">${PL.gold}</span></div>
-  `;
-
-  // Append to HUD so it sits above the game canvas
-  const hud = document.getElementById('hud');
-  if(!hud) return;
-  hud.appendChild(el);
-
-  // Buy button handler
-  document.getElementById('baBuyBtn').addEventListener('click', ()=>{
-    if(PL.gold < potionCost){ GS.notif('Not enough gold!','red'); return; }
-    PL.gold -= potionCost;
-    if(!PL.potions) PL.potions = {hp:0, mp:0};
-    PL.potions.hp++;
-    const goldDisp = document.getElementById('goldDisp');
-    if(goldDisp) goldDisp.textContent = PL.gold;
-    AU.sfx('buy');
-    GS.notif('🧪 +1 Health Vial (×' + PL.potions.hp + ')','gold');
-    hudUpdate();
-    if(typeof AUTH !== 'undefined' && AUTH.token) AUTH.save();
-    dismissBossAlert();
-  });
-
-  // Dismiss button handler
-  document.getElementById('baDismissBtn').addEventListener('click', ()=>{
-    dismissBossAlert();
-  });
-
-  // Auto-dismiss after 10 seconds so it never permanently blocks gameplay
-  setTimeout(()=>{ if(document.getElementById('bossAlert')) dismissBossAlert(); }, 10000);
-}
-
-// Called every game loop frame — shows low-HP alert during boss fights
-function checkBossWarnings(){
-  if(!GS.running || GS.paused || !PL.alive) return;
-  if(_bossLowHpCooldown > 0){ _bossLowHpCooldown--; return; }
-  // Only trigger during active boss wave, not after clear
-  if(GS.bossWave && !GS.waveComplete && PL.hp / PL.maxHp < 0.28){
-    // Don't stack on top of an existing alert
-    if(document.getElementById('bossAlert')) return;
-    showBossAlert('low-hp');
-    // Cooldown: ~15s at 60fps / ~30s at 30fps — won't spam the player
-    _bossLowHpCooldown = 900;
-  }
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
 function gameLoop(t){
   requestAnimationFrame(gameLoop);
   // On mobile, skip frames that arrive too fast (cap to 30fps)
@@ -4597,7 +4443,6 @@ function gameLoop(t){
   GS.checkClear();
   
   flushHud();
-  checkBossWarnings();
   CTX.clearRect(0,0,CNV.width,CNV.height);
   CTX.fillStyle='#000';CTX.fillRect(0,0,CNV.width,CNV.height);
   drawDungeon();
