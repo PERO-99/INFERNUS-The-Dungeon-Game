@@ -1147,7 +1147,7 @@ body:not(.game-active) #touchControls{display:none!important;}
 .rage-orb .rage-pct-text{position:absolute;bottom:4px;font-size:7px;color:var(--rage-orange);font-family:'Cinzel',serif;letter-spacing:0;}
 @keyframes rf{0%{border-color:var(--rage-orange)}100%{border-color:var(--gold-bright)}}
 .minimap{position:absolute;top:clamp(80px,14vh,110px);right:clamp(8px,2vw,14px);width:clamp(70px,15vw,105px);height:clamp(70px,15vw,105px);
-  background:rgba(4,4,10,.88);border:1px solid var(--stone2);overflow:hidden;pointer-events:none;}
+  background:rgba(8,8,20,.92);border:1px solid rgba(100,100,160,.6);overflow:hidden;pointer-events:none;box-shadow:0 0 10px rgba(0,0,0,.6),inset 0 0 8px rgba(0,0,0,.4);}
 .minimap-lbl{position:absolute;top:2px;left:50%;transform:translateX(-50%);font-size:7px;letter-spacing:.18em;color:var(--text-dim);}
 .kill-feed{position:absolute;right:14px;display:flex;flex-direction:column;gap:4px;pointer-events:none;}
 .kf-entry{background:rgba(0,0,0,.75);border-left:3px solid var(--blood-bright);padding:5px 10px;
@@ -1381,22 +1381,28 @@ body:not(.game-active) #touchControls{display:none!important;}
 .login-btn-main:active{transform:translateY(0);}
 .login-btn-sec{
   width:100%;
-  padding:11px;
-  background:transparent;
-  border:1px solid rgba(80,55,100,.5);
-  color:var(--text-dim);
+  padding:12px;
+  background:linear-gradient(135deg,rgba(30,15,50,.9),rgba(20,8,35,.95));
+  border:1px solid rgba(130,90,180,.55);
+  border-left:3px solid rgba(160,100,220,.7);
+  color:rgba(210,185,255,.85);
   font-family:'Cinzel',serif;
-  font-size:11px;
+  font-size:12px;
+  font-weight:600;
   letter-spacing:.2em;
   cursor:pointer;
   transition:all .22s;
   text-transform:uppercase;
   clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  box-shadow:0 0 14px rgba(100,50,180,.2);
 }
 .login-btn-sec:hover{
-  border-color:rgba(212,175,55,.5);
-  color:var(--gold);
-  background:rgba(212,175,55,.05);
+  border-color:rgba(180,130,255,.7);
+  border-left-color:rgba(200,160,255,.9);
+  color:rgba(230,210,255,1);
+  background:linear-gradient(135deg,rgba(60,25,100,.9),rgba(40,12,70,.95));
+  box-shadow:0 0 24px rgba(120,60,220,.35);
+  transform:translateY(-1px);
 }
 #authMsg{color:var(--blood-bright);font-size:10px;margin-top:8px;text-align:center;min-height:16px;letter-spacing:.1em;}
 
@@ -2000,8 +2006,8 @@ body.is-touch-device.game-active .rage-panel{display:none!important;visibility:h
       <input type="password" id="authPassword" class="login-input" placeholder="Secret passphrase...">
     </div>
     <div class="login-btn-row">
-      <button class="login-btn-main" onclick="AUTH.login()">⚔ Enter the Dungeon</button>
-      <button class="login-btn-sec" onclick="AUTH.register()">✦ Create New Legend</button>
+      <button class="login-btn-main" onclick="AUTH.register()">✦ Create New Legend</button>
+      <button class="login-btn-sec" onclick="AUTH.login()">⚔ Enter the Dungeon</button>
     </div>
     <div id="authMsg"></div>
   </div>
@@ -3343,7 +3349,7 @@ class Enemy{
     C.translate(s.x,s.y+bob);
     drawEnemySprite(C,this.type,this.sz,this.animT,this.elite);
     C.restore();
-    if(this.hp<this.maxHp){
+    if(this.alive && this.hp<this.maxHp){
       const bw=this.sz*2.6,bh=5,bx=s.x-bw/2,by=s.y+bob-this.sz-18;
       const pct=this.hp/this.maxHp;
       C.fillStyle='rgba(0,0,0,.75)';C.fillRect(bx-1,by-1,bw+2,bh+2);
@@ -4293,12 +4299,18 @@ function drawMinimap(){
   const mc=_mmCtx;const W=mm.width,H=mm.height;
   const B=GS.B;mc.clearRect(0,0,W,H);
   mc.fillStyle='rgba(0,0,0,.8)';mc.fillRect(0,0,W,H);
-  mc.fillStyle='#1A1A28';mc.fillRect(4,13,W-8,H-17);
+  mc.fillStyle='#2A2A40';mc.fillRect(4,13,W-8,H-17);
+  // Draw grid lines for better orientation
+  mc.strokeStyle='rgba(255,255,255,.06)';mc.lineWidth=1;
+  for(let gx=4;gx<W-4;gx+=Math.floor((W-8)/4)){mc.beginPath();mc.moveTo(gx,13);mc.lineTo(gx,H-4);mc.stroke();}
+  for(let gy=13;gy<H-4;gy+=Math.floor((H-17)/4)){mc.beginPath();mc.moveTo(4,gy);mc.lineTo(W-4,gy);mc.stroke();}
   for(let i=0;i<GS.enemies.length;i++){
     const e=GS.enemies[i];if(!e.alive)continue;
     const ex=(e.x-B.x)/B.w*(W-8)+4,ey=(e.y-B.y)/B.h*(H-17)+13;
-    mc.fillStyle=e.isBoss?'#FF0000':e.elite?'#FF8800':e.col;
-    mc.beginPath();mc.arc(ex,ey,e.isBoss?5:e.elite?4:2.5,0,Math.PI*2);mc.fill();
+    mc.fillStyle=e.isBoss?'#FF3333':e.elite?'#FF9900':'#FF6644';
+    mc.beginPath();mc.arc(ex,ey,e.isBoss?6:e.elite?4.5:3,0,Math.PI*2);mc.fill();
+    // White outline so dots pop on dark map
+    mc.strokeStyle='rgba(255,255,255,.55)';mc.lineWidth=1;mc.stroke();
   }
   const px=(PL.x-B.x)/B.w*(W-8)+4,py=(PL.y-B.y)/B.h*(H-17)+13;
   mc.fillStyle='#FFD700';mc.beginPath();mc.arc(px,py,4,0,Math.PI*2);mc.fill();
